@@ -10,14 +10,18 @@ import SwiftData
 
 @Model
 final class SeatCheckIn {
-    var checkedInBy: OccupantIdentifier
+    var occupantIdentifier: String
     var seat: StudySeat?
     var checkedInAt: Date
     var expiresAt: Date
     var releasedAt: Date?
 
+    var checkedInBy: OccupantIdentifier {
+        OccupantIdentifier(value: occupantIdentifier)
+    }
+
     init(checkedInBy: OccupantIdentifier, seat: StudySeat, checkedInAt: Date, expiresAt: Date) {
-        self.checkedInBy = checkedInBy
+        self.occupantIdentifier = checkedInBy.value
         self.seat = seat
         self.checkedInAt = checkedInAt
         self.expiresAt = expiresAt

@@ -10,6 +10,6 @@ import Foundation
 protocol StudySpaceRepository {
     func buildings() throws -> [CampusBuilding]
     func activeCheckIn(for occupant: OccupantIdentifier, at moment: Date) throws -> SeatCheckIn?
-    func add(_ checkIn: SeatCheckIn) throws
+    func add(_ checkIn: SeatCheckIn)
     func save() throws
 }

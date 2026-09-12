@@ -17,15 +17,18 @@ struct SwiftDataStudySpaceRepository: StudySpaceRepository {
     }
 
     func activeCheckIn(for occupant: OccupantIdentifier, at moment: Date) throws -> SeatCheckIn? {
-        let unexpired = FetchDescriptor<SeatCheckIn>(
-            predicate: #Predicate { $0.releasedAt == nil && $0.expiresAt > moment }
+        let identifier = occupant.value
+        var descriptor = FetchDescriptor<SeatCheckIn>(
+            predicate: #Predicate {
+                $0.occupantIdentifier == identifier && $0.releasedAt == nil && $0.expiresAt > moment
+            }
         )
-        return try context.fetch(unexpired).first { $0.checkedInBy == occupant }
+        descriptor.fetchLimit = 1
+        return try context.fetch(descriptor).first
     }
 
-    func add(_ checkIn: SeatCheckIn) throws {
+    func add(_ checkIn: SeatCheckIn) {
         context.insert(checkIn)
-        try context.save()
     }
 
     func save() throws {
