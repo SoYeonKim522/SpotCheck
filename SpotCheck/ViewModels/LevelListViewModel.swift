@@ -15,7 +15,7 @@ final class LevelListViewModel {
 
     private(set) var buildings: [CampusBuilding] = []
     private(set) var availabilities: [LevelAvailability] = []
-    var selectedBuilding: CampusBuilding?
+    private(set) var selectedBuilding: CampusBuilding?
 
     init(repository: StudySpaceRepository) {
         self.repository = repository
@@ -25,8 +25,9 @@ final class LevelListViewModel {
         availabilities.compactMap(\.lastUpdatedAt).max()
     }
 
-    var checkInCount: Int {
-        availabilities.reduce(0) { $0 + ($1.total - $1.free) }
+    func select(building: CampusBuilding, now: Date) {
+        selectedBuilding = building
+        refresh(now: now)
     }
 
     func refresh(now: Date) {

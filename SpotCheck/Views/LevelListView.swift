@@ -20,7 +20,7 @@ struct LevelListView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Menu {
                     ForEach(viewModel.buildings) { building in
-                        Button(building.name) { viewModel.selectedBuilding = building }
+                        Button(building.name) { viewModel.select(building: building, now: .now) }
                     }
                 } label: {
                     HStack(spacing: 6) {
@@ -41,8 +41,10 @@ struct LevelListView: View {
 
             List {
                 Section {
-                    ForEach(viewModel.availabilities, id: \.levelNumber) { availability in
-                        LevelAvailabilityRow(availability: availability)
+                    ForEach(viewModel.availabilities, id: \.level) { availability in
+                        NavigationLink(value: availability.level) {
+                            LevelAvailabilityRow(availability: availability)
+                        }
                     }
                 } footer: {
                     footer
@@ -51,6 +53,9 @@ struct LevelListView: View {
             .refreshable { viewModel.refresh(now: .now) }
         }
         .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(for: StudyLevel.self) { level in
+            SeatPickerView(level: level)
+        }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
@@ -61,13 +66,12 @@ struct LevelListView: View {
             }
         }
         .onAppear { viewModel.refresh(now: .now) }
-        .onChange(of: viewModel.selectedBuilding) { viewModel.refresh(now: .now) }
     }
 
     @ViewBuilder
     private var footer: some View {
         if let lastUpdatedAt = viewModel.lastUpdatedAt {
-            Text("Last updated \(lastUpdatedAt.formatted(.relative(presentation: .numeric, unitsStyle: .abbreviated))) · \(viewModel.checkInCount) check-ins")
+            Text("Last updated \(lastUpdatedAt.formatted(.relative(presentation: .numeric, unitsStyle: .abbreviated)))")
         } else {
             Text("No check-ins reported yet")
         }
@@ -95,7 +99,7 @@ private struct LevelAvailabilityRow: View {
                 .fill(status)
                 .frame(width: 14, height: 14)
 
-            Text("L\(availability.levelNumber)")
+            Text("L\(availability.level.number)")
                 .fontWeight(.medium)
 
             ProgressView(
