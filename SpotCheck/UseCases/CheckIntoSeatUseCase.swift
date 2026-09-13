@@ -9,7 +9,6 @@ import Foundation
 
 struct CheckIntoSeatUseCase {
     let repository: StudySpaceRepository
-    let holdDuration: TimeInterval = 60 * 60
 
     func execute(
         seat: StudySeat,
@@ -27,7 +26,7 @@ struct CheckIntoSeatUseCase {
             checkedInBy: occupant,
             seat: seat,
             checkedInAt: now,
-            expiresAt: now.addingTimeInterval(holdDuration)
+            expiresAt: now.addingTimeInterval(SeatHoldPolicy.duration)
         )
         repository.add(checkIn)
         try repository.save()

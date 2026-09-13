@@ -9,8 +9,6 @@ import Foundation
 import SwiftData
 
 enum SeedData {
-    private static let holdDuration: TimeInterval = 60 * 60
-
     static func loadIfEmpty(into context: ModelContext, now: Date) throws {
         guard try context.fetchCount(FetchDescriptor<CampusBuilding>()) == 0 else { return }
 
@@ -74,7 +72,7 @@ enum SeedData {
                         checkedInBy: OccupantIdentifier(value: "seed-occupant-\(occupantNumber)"),
                         seat: seat,
                         checkedInAt: checkedInAt,
-                        expiresAt: checkedInAt.addingTimeInterval(holdDuration)
+                        expiresAt: checkedInAt.addingTimeInterval(SeatHoldPolicy.duration)
                     )
                 )
             }
@@ -86,7 +84,7 @@ enum SeedData {
                 checkedInBy: OccupantIdentifier(value: "seed-occupant-expired"),
                 seat: building2Level9Library.seats[17],
                 checkedInAt: expiredAt,
-                expiresAt: expiredAt.addingTimeInterval(holdDuration)
+                expiresAt: expiredAt.addingTimeInterval(SeatHoldPolicy.duration)
             )
         )
 
