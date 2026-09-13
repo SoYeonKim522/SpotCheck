@@ -18,8 +18,11 @@ struct ReleaseSeatUseCase {
         guard checkIn.checkedInBy == occupant else {
             throw ReleaseSeatError.checkInBelongsToAnotherOccupant
         }
-        guard checkIn.isActive(at: now) else {
-            throw ReleaseSeatError.checkInIsNoLongerActive
+        guard checkIn.releasedAt == nil else {
+            throw ReleaseSeatError.seatWasAlreadyReleased
+        }
+        guard now < checkIn.expiresAt else {
+            throw ReleaseSeatError.holdHasAlreadyExpired
         }
 
         checkIn.releasedAt = now
@@ -29,5 +32,6 @@ struct ReleaseSeatUseCase {
 
 enum ReleaseSeatError: Error {
     case checkInBelongsToAnotherOccupant
-    case checkInIsNoLongerActive
+    case seatWasAlreadyReleased
+    case holdHasAlreadyExpired
 }
