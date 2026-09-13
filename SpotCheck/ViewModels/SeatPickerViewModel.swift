@@ -19,12 +19,20 @@ final class SeatPickerViewModel {
     private let occupant: OccupantIdentifier
     private let viewLevelAvailability = ViewLevelAvailabilityUseCase()
     private let checkIntoSeat: CheckIntoSeatUseCase
+    private let onCheckIn: () -> Void
 
-    init(level: StudyLevel, repository: StudySpaceRepository, occupant: OccupantIdentifier, now: Date) {
+    init(
+        level: StudyLevel,
+        repository: StudySpaceRepository,
+        occupant: OccupantIdentifier,
+        now: Date,
+        onCheckIn: @escaping () -> Void
+    ) {
         self.level = level
         self.occupant = occupant
         self.checkIntoSeat = CheckIntoSeatUseCase(repository: repository)
         self.now = now
+        self.onCheckIn = onCheckIn
     }
 
     var availability: LevelAvailability {
@@ -55,6 +63,10 @@ final class SeatPickerViewModel {
         selectedSeat = seat
     }
 
+    func clearCheckInError() {
+        checkInError = nil
+    }
+
     func deselect() {
         checkInError = nil
         selectedSeat = nil
@@ -65,6 +77,7 @@ final class SeatPickerViewModel {
             _ = try checkIntoSeat.execute(seat: seat, occupant: occupant, now: now)
             checkInError = nil
             refresh(now: now)
+            onCheckIn()
         } catch let error as CheckIntoSeatError {
             checkInError = error
         } catch {

@@ -11,16 +11,25 @@ import SwiftData
 struct SeatPickerView: View {
     @State private var viewModel: SeatPickerViewModel
     @State private var requiresPowerOutlet = false
+    @State private var requiresComputer = false
     @State private var requiresPartition = false
+    @State private var requiresWindow = false
+    @State private var requiresSharedTable = false
     @State private var sheetHeight: CGFloat = 320
 
-    init(level: StudyLevel, repository: StudySpaceRepository, occupant: OccupantIdentifier) {
+    init(
+        level: StudyLevel,
+        repository: StudySpaceRepository,
+        occupant: OccupantIdentifier,
+        onCheckIn: @escaping () -> Void
+    ) {
         _viewModel = State(
             initialValue: SeatPickerViewModel(
                 level: level,
                 repository: repository,
                 occupant: occupant,
-                now: .now
+                now: .now,
+                onCheckIn: onCheckIn
             )
         )
     }
@@ -32,8 +41,16 @@ struct SeatPickerView: View {
             Section {
                 summary
                 legend
-                Toggle("Power outlet", isOn: $requiresPowerOutlet)
-                Toggle("Partition", isOn: $requiresPartition)
+                filters
+
+                if isFiltering && !hasMatchingSeat {
+                    Text("No seat on this level has all of these. Turn a filter off to see more.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            } footer: {
+                Text(LastUpdated.text(viewModel.availability.lastUpdatedAt, at: .now))
+                    .frame(maxWidth: .infinity, alignment: .trailing)
             }
 
             ForEach(viewModel.zones) { zone in
@@ -76,20 +93,35 @@ struct SeatPickerView: View {
             SeatDetailSheet(
                 seat: seat,
                 levelNumber: viewModel.level.number,
-                error: viewModel.checkInError,
                 checkIn: { viewModel.checkIn(to: seat, now: .now) }
             )
             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { sheetHeight = $0 }
             .presentationDetents([.height(sheetHeight)])
+            .alert(
+                viewModel.checkInError?.errorDescription ?? "",
+                isPresented: checkInFailed,
+                actions: { Button("OK", role: .cancel) {} },
+                message: { Text(viewModel.checkInError?.recoverySuggestion ?? "") }
+            )
         }
         .refreshable { viewModel.refresh(now: .now) }
         .onAppear { viewModel.refresh(now: .now) }
-        .onChange(of: requiresPowerOutlet) { releaseFilteredSelection() }
-        .onChange(of: requiresPartition) { releaseFilteredSelection() }
+        .onChange(of: activeFilters) { releaseFilteredSelection() }
+    }
+
+    private var activeFilters: [Bool] {
+        [requiresPowerOutlet, requiresComputer, requiresPartition, requiresWindow, requiresSharedTable]
     }
 
     private var isFiltering: Bool {
-        requiresPowerOutlet || requiresPartition
+        activeFilters.contains(true)
+    }
+
+    private var checkInFailed: Binding<Bool> {
+        Binding(
+            get: { viewModel.checkInError != nil },
+            set: { if !$0 { viewModel.clearCheckInError() } }
+        )
     }
 
     private var seatDetail: Binding<StudySeat?> {
@@ -105,8 +137,18 @@ struct SeatPickerView: View {
         return viewModel.isFree(seat) ? .free : .taken
     }
 
+    private var hasMatchingSeat: Bool {
+        viewModel.zones.contains { zone in
+            viewModel.seats(in: zone).contains(where: matchesFilters)
+        }
+    }
+
     private func matchesFilters(_ seat: StudySeat) -> Bool {
-        (!requiresPowerOutlet || seat.hasPowerOutlet) && (!requiresPartition || seat.hasPartition)
+        (!requiresPowerOutlet || seat.hasPowerOutlet)
+            && (!requiresComputer || seat.hasComputer)
+            && (!requiresPartition || seat.hasPartition)
+            && (!requiresWindow || seat.isByWindow)
+            && (!requiresSharedTable || seat.isSharedTable)
     }
 
     private func releaseFilteredSelection() {
@@ -116,14 +158,41 @@ struct SeatPickerView: View {
     }
 
     private var summary: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text("\(viewModel.availability.free) of \(viewModel.availability.total) seats free")
-                .font(.headline)
-                .monospacedDigit()
+        Text("\(viewModel.availability.free) of \(viewModel.availability.total) seats free")
+            .font(.headline)
+            .monospacedDigit()
+    }
 
-            Text(LastUpdated.text(viewModel.availability.lastUpdatedAt, at: .now))
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+    private var filters: some View {
+        ScrollView(.horizontal) {
+            HStack(spacing: 8) {
+                filterChip("Power outlet", isOn: $requiresPowerOutlet)
+                filterChip("Computer", isOn: $requiresComputer)
+                filterChip("Partition", isOn: $requiresPartition)
+                filterChip("Window", isOn: $requiresWindow)
+                filterChip("Shared table", isOn: $requiresSharedTable)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func filterChip(_ title: String, isOn: Binding<Bool>) -> some View {
+        let chip = Toggle(isOn: isOn) {
+            HStack(spacing: 6) {
+                if isOn.wrappedValue {
+                    Image(systemName: "checkmark")
+                        .font(.footnote.weight(.semibold))
+                }
+                Text(title)
+            }
+        }
+        .toggleStyle(.button)
+        .buttonBorderShape(.capsule)
+
+        if isOn.wrappedValue {
+            chip.buttonStyle(.borderedProminent)
+        } else {
+            chip.buttonStyle(.bordered)
         }
     }
 
@@ -212,7 +281,6 @@ private struct SeatChip: View {
 private struct SeatDetailSheet: View {
     let seat: StudySeat
     let levelNumber: Int
-    let error: CheckIntoSeatError?
     let checkIn: () -> Void
 
     private var features: [String] {
@@ -226,8 +294,7 @@ private struct SeatDetailSheet: View {
     }
 
     private var holdDuration: String {
-        Duration.seconds(SeatHoldPolicy.duration)
-            .formatted(.units(allowed: [.hours, .minutes], width: .wide))
+        SeatHoldPolicy.durationText
     }
 
     var body: some View {
@@ -244,16 +311,9 @@ private struct SeatDetailSheet: View {
                     .font(.subheadline)
             }
 
-            if let error {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(error.errorDescription ?? "")
-                        .fontWeight(.medium)
-                        .foregroundStyle(.red)
-                    Text(error.recoverySuggestion ?? "")
-                        .foregroundStyle(.secondary)
-                }
-                .font(.subheadline)
-            }
+            Text("Your hold lasts \(holdDuration), then the seat frees itself.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
 
             Button(action: checkIn) {
                 Text("Check in to \(seat.label)")
@@ -261,10 +321,6 @@ private struct SeatDetailSheet: View {
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
-
-            Text("Your hold lasts \(holdDuration), then the seat frees itself.")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
         }
         .fixedSize(horizontal: false, vertical: true)
         .padding(24)
@@ -293,7 +349,8 @@ private func previewLevel() -> StudyLevel {
         SeatPickerView(
             level: previewLevel(),
             repository: SwiftDataStudySpaceRepository(context: seatPickerPreviewContainer.mainContext),
-            occupant: OccupantIdentifier(value: "preview-occupant")
+            occupant: OccupantIdentifier(value: "preview-occupant"),
+            onCheckIn: {}
         )
     }
     .modelContainer(seatPickerPreviewContainer)
