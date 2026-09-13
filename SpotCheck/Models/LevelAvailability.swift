@@ -12,8 +12,12 @@ import Foundation
 /// `free` excludes seats held by an unexpired check-in; an expired one no longer holds its seat.
 /// `lastUpdatedAt` is the level's most recent check-in or release, `nil` if there is none.
 /// A free-seat count is never shown without it.
+///
+/// /// A value type because it is recomputed on every read and never persisted.
+/// It refers to the `StudyLevel` so a screen can navigate to that level's seats.
+
 struct LevelAvailability {
-    let levelNumber: Int
+    let level: StudyLevel
     let free: Int
     let total: Int
     let lastUpdatedAt: Date?
