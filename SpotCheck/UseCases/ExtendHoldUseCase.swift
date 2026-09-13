@@ -25,13 +25,40 @@ struct ExtendHoldUseCase {
             throw ExtendHoldError.holdHasAlreadyExpired
         }
 
-        checkIn.expiresAt = now.addingTimeInterval(SeatHoldPolicy.duration)
+        let latestExpiry = checkIn.checkedInAt.addingTimeInterval(SeatHoldPolicy.maximumDuration)
+        guard checkIn.expiresAt < latestExpiry else {
+            throw ExtendHoldError.holdIsAtItsMaximum
+        }
+
+        checkIn.expiresAt = min(
+            checkIn.expiresAt.addingTimeInterval(SeatHoldPolicy.duration),
+            latestExpiry
+        )
         try repository.save()
     }
 }
 
-enum ExtendHoldError: Error {
+enum ExtendHoldError: LocalizedError {
     case checkInBelongsToAnotherOccupant
     case seatWasAlreadyReleased
     case holdHasAlreadyExpired
+    case holdIsAtItsMaximum
+
+    var errorDescription: String? {
+        switch self {
+        case .checkInBelongsToAnotherOccupant: "Someone else holds this seat."
+        case .seatWasAlreadyReleased: "You already released this seat."
+        case .holdHasAlreadyExpired: "Your hold had already ended."
+        case .holdIsAtItsMaximum: "A seat can be held for \(SeatHoldPolicy.maximumDurationText) at most."
+        }
+    }
+
+    var recoverySuggestion: String? {
+        switch self {
+        case .checkInBelongsToAnotherOccupant: "You can only extend your own hold."
+        case .seatWasAlreadyReleased: "Check in again if the seat is still free."
+        case .holdHasAlreadyExpired: "Check in again if the seat is still free."
+        case .holdIsAtItsMaximum: "Check in again once this hold ends, if the seat is still free."
+        }
+    }
 }

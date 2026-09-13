@@ -30,8 +30,24 @@ struct ReleaseSeatUseCase {
     }
 }
 
-enum ReleaseSeatError: Error {
+enum ReleaseSeatError: LocalizedError {
     case checkInBelongsToAnotherOccupant
     case seatWasAlreadyReleased
     case holdHasAlreadyExpired
+
+    var errorDescription: String? {
+        switch self {
+        case .checkInBelongsToAnotherOccupant: "Someone else holds this seat."
+        case .seatWasAlreadyReleased: "You already released this seat."
+        case .holdHasAlreadyExpired: "Your hold had already ended."
+        }
+    }
+
+    var recoverySuggestion: String? {
+        switch self {
+        case .checkInBelongsToAnotherOccupant: "You can only release a seat you checked in to."
+        case .seatWasAlreadyReleased: "It is free for someone else now."
+        case .holdHasAlreadyExpired: "The seat freed itself an hour after you checked in."
+        }
+    }
 }
