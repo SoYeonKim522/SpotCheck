@@ -10,16 +10,22 @@ import SwiftData
 
 struct RootView: View {
     @Environment(\.modelContext) private var context
+    @State private var isSeeded = false
 
     var body: some View {
-        Text("SpotCheck")
-            .task {
-                do {
-                    try SeedData.loadIfEmpty(into: context, now: Date())
-                } catch {
-                    assertionFailure("Seed data failed to load: \(error)")
-                }
+        NavigationStack {
+            if isSeeded {
+                LevelListView(repository: SwiftDataStudySpaceRepository(context: context))
             }
+        }
+        .task {
+            do {
+                try SeedData.loadIfEmpty(into: context, now: Date())
+                isSeeded = true
+            } catch {
+                assertionFailure("Seed data failed to load: \(error)")
+            }
+        }
     }
 }
 
