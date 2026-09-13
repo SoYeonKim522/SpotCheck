@@ -12,6 +12,7 @@ struct SeatPickerView: View {
     @State private var viewModel: SeatPickerViewModel
     @State private var requiresPowerOutlet = false
     @State private var requiresPartition = false
+    @State private var sheetHeight: CGFloat = 320
 
     init(level: StudyLevel, repository: StudySpaceRepository, occupant: OccupantIdentifier) {
         _viewModel = State(
@@ -39,18 +40,19 @@ struct SeatPickerView: View {
                 Section {
                     LazyVGrid(columns: columns, spacing: 8) {
                         ForEach(viewModel.seats(in: zone)) { seat in
+                            let state = state(of: seat)
                             Button {
                                 viewModel.select(seat)
                             } label: {
                                 SeatChip(
                                     seat: seat,
-                                    isFree: viewModel.isFree(seat),
-                                    isSelected: viewModel.selectedSeat == seat,
-                                    matchesFilters: matchesFilters(seat)
+                                    state: state,
+                                    isMine: viewModel.isHeldByMe(seat),
+                                    isSelected: viewModel.selectedSeat == seat
                                 )
                             }
                             .buttonStyle(.plain)
-                            .disabled(!viewModel.isFree(seat) || !matchesFilters(seat))
+                            .disabled(state != .free)
                         }
                     }
                     .padding(.vertical, 4)
@@ -70,6 +72,16 @@ struct SeatPickerView: View {
                 }
             }
         }
+        .sheet(item: seatDetail) { seat in
+            SeatDetailSheet(
+                seat: seat,
+                levelNumber: viewModel.level.number,
+                error: viewModel.checkInError,
+                checkIn: { viewModel.checkIn(to: seat, now: .now) }
+            )
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { sheetHeight = $0 }
+            .presentationDetents([.height(sheetHeight)])
+        }
         .refreshable { viewModel.refresh(now: .now) }
         .onAppear { viewModel.refresh(now: .now) }
         .onChange(of: requiresPowerOutlet) { releaseFilteredSelection() }
@@ -78,6 +90,19 @@ struct SeatPickerView: View {
 
     private var isFiltering: Bool {
         requiresPowerOutlet || requiresPartition
+    }
+
+    private var seatDetail: Binding<StudySeat?> {
+        Binding(
+            get: { viewModel.selectedSeat },
+            set: { if $0 == nil { viewModel.deselect() } }
+        )
+    }
+
+    private func state(of seat: StudySeat) -> SeatChipState {
+        if !matchesFilters(seat) { return .filteredOut }
+        if viewModel.isHeldByMe(seat) { return .mine }
+        return viewModel.isFree(seat) ? .free : .taken
     }
 
     private func matchesFilters(_ seat: StudySeat) -> Bool {
@@ -96,15 +121,9 @@ struct SeatPickerView: View {
                 .font(.headline)
                 .monospacedDigit()
 
-            if let lastUpdatedAt = viewModel.availability.lastUpdatedAt {
-                Text("Last updated \(lastUpdatedAt.formatted(.relative(presentation: .numeric, unitsStyle: .abbreviated)))")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            } else {
-                Text("No check-ins reported yet")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
+            Text(LastUpdated.text(viewModel.availability.lastUpdatedAt, at: .now))
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
         }
     }
 
@@ -139,36 +158,117 @@ struct SeatPickerView: View {
     }
 }
 
-private struct SeatChip: View {
-    let seat: StudySeat
-    let isFree: Bool
-    let isSelected: Bool
-    let matchesFilters: Bool
+private enum SeatChipState {
+    case free
+    case taken
+    case mine
+    case filteredOut
 
-    private var tint: Color {
-        guard matchesFilters else { return .gray }
-        return isFree ? .green : .red
+    var tint: Color {
+        switch self {
+        case .free, .mine: .green
+        case .taken: .red
+        case .filteredOut: .gray
+        }
     }
 
-    private var state: String {
-        guard matchesFilters else { return "filtered out" }
-        return isFree ? "free" : "taken"
+    var name: String {
+        switch self {
+        case .free: "free"
+        case .taken: "taken"
+        case .mine: "checked in"
+        case .filteredOut: "filtered out"
+        }
+    }
+}
+
+private struct SeatChip: View {
+    let seat: StudySeat
+    let state: SeatChipState
+    let isMine: Bool
+    let isSelected: Bool
+
+    private var accessibilityName: String {
+        state == .filteredOut && isMine ? "\(state.name), checked in" : state.name
     }
 
     var body: some View {
         Text(seat.label)
             .font(.caption)
             .monospacedDigit()
-            .foregroundStyle(matchesFilters ? .primary : .secondary)
+            .foregroundStyle(state == .filteredOut ? .secondary : .primary)
             .frame(maxWidth: .infinity, minHeight: 44)
-            .background(tint.opacity(0.35))
+            .background(state.tint.opacity(0.35))
             .clipShape(RoundedRectangle(cornerRadius: 8))
             .overlay {
                 RoundedRectangle(cornerRadius: 8)
-                    .strokeBorder(Color.accentColor, lineWidth: isSelected ? 3 : 0)
+                    .strokeBorder(Color.accentColor, lineWidth: isSelected || isMine ? 3 : 0)
             }
-            .accessibilityLabel("Seat \(seat.label), \(state)")
+            .accessibilityLabel("Seat \(seat.label), \(accessibilityName)")
             .accessibilityAddTraits(isSelected ? [.isSelected] : [])
+    }
+}
+
+private struct SeatDetailSheet: View {
+    let seat: StudySeat
+    let levelNumber: Int
+    let error: CheckIntoSeatError?
+    let checkIn: () -> Void
+
+    private var features: [String] {
+        var names: [String] = []
+        if seat.isByWindow { names.append("By a window") }
+        if seat.hasComputer { names.append("Computer") }
+        if seat.hasPowerOutlet { names.append("Power outlet") }
+        if seat.hasPartition { names.append("Partition") }
+        if seat.isSharedTable { names.append("Shared table") }
+        return names
+    }
+
+    private var holdDuration: String {
+        Duration.seconds(SeatHoldPolicy.duration)
+            .formatted(.units(allowed: [.hours, .minutes], width: .wide))
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(seat.label)
+                    .font(.largeTitle.bold())
+                Text("\(seat.zone?.name ?? "") · Level \(levelNumber)")
+                    .foregroundStyle(.secondary)
+            }
+
+            if !features.isEmpty {
+                Text(features.joined(separator: " · "))
+                    .font(.subheadline)
+            }
+
+            if let error {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(error.errorDescription ?? "")
+                        .fontWeight(.medium)
+                        .foregroundStyle(.red)
+                    Text(error.recoverySuggestion ?? "")
+                        .foregroundStyle(.secondary)
+                }
+                .font(.subheadline)
+            }
+
+            Button(action: checkIn) {
+                Text("Check in to \(seat.label)")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
+
+            Text("Your hold lasts \(holdDuration), then the seat frees itself.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+        .fixedSize(horizontal: false, vertical: true)
+        .padding(24)
+        .padding(.bottom, 16)
     }
 }
 

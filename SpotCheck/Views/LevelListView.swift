@@ -73,13 +73,8 @@ struct LevelListView: View {
         .onAppear { viewModel.refresh(now: .now) }
     }
 
-    @ViewBuilder
     private var footer: some View {
-        if let lastUpdatedAt = viewModel.lastUpdatedAt {
-            Text("Last updated \(lastUpdatedAt.formatted(.relative(presentation: .numeric, unitsStyle: .abbreviated)))")
-        } else {
-            Text("No check-ins reported yet")
-        }
+        Text(LastUpdated.text(viewModel.lastUpdatedAt, at: .now))
     }
 }
 

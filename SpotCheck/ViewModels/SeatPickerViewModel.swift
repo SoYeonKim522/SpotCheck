@@ -13,6 +13,7 @@ final class SeatPickerViewModel {
     let level: StudyLevel
 
     private(set) var selectedSeat: StudySeat?
+    private(set) var checkInError: CheckIntoSeatError?
     private var now: Date
 
     private let occupant: OccupantIdentifier
@@ -44,13 +45,31 @@ final class SeatPickerViewModel {
         seat.activeCheckIn(at: now) == nil
     }
 
+    func isHeldByMe(_ seat: StudySeat) -> Bool {
+        seat.activeCheckIn(at: now)?.checkedInBy == occupant
+    }
+
     func select(_ seat: StudySeat) {
         guard isFree(seat) else { return }
+        checkInError = nil
         selectedSeat = seat
     }
 
     func deselect() {
+        checkInError = nil
         selectedSeat = nil
+    }
+
+    func checkIn(to seat: StudySeat, now: Date) {
+        do {
+            _ = try checkIntoSeat.execute(seat: seat, occupant: occupant, now: now)
+            checkInError = nil
+            refresh(now: now)
+        } catch let error as CheckIntoSeatError {
+            checkInError = error
+        } catch {
+            assertionFailure("A check-in could not be saved: \(error)")
+        }
     }
 
     func refresh(now: Date) {

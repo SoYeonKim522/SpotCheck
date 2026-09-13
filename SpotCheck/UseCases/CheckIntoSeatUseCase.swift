@@ -34,7 +34,21 @@ struct CheckIntoSeatUseCase {
     }
 }
 
-enum CheckIntoSeatError: Error {
+enum CheckIntoSeatError: LocalizedError {
     case occupantAlreadyHoldsASeat
     case seatIsTaken
+
+    var errorDescription: String? {
+        switch self {
+        case .occupantAlreadyHoldsASeat: "You already hold a seat."
+        case .seatIsTaken: "Someone else checked in to this seat first."
+        }
+    }
+
+    var recoverySuggestion: String? {
+        switch self {
+        case .occupantAlreadyHoldsASeat: "Release the seat you are holding, then check in here."
+        case .seatIsTaken: "Refresh to see which seats are free now."
+        }
+    }
 }
