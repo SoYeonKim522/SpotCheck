@@ -13,12 +13,16 @@ final class SeatPickerViewModel {
     let level: StudyLevel
 
     private(set) var selectedSeat: StudySeat?
-    private(set) var now: Date
+    private var now: Date
 
+    private let occupant: OccupantIdentifier
     private let viewLevelAvailability = ViewLevelAvailabilityUseCase()
+    private let checkIntoSeat: CheckIntoSeatUseCase
 
-    init(level: StudyLevel, now: Date) {
+    init(level: StudyLevel, repository: StudySpaceRepository, occupant: OccupantIdentifier, now: Date) {
         self.level = level
+        self.occupant = occupant
+        self.checkIntoSeat = CheckIntoSeatUseCase(repository: repository)
         self.now = now
     }
 

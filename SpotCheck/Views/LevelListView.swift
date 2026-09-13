@@ -11,7 +11,12 @@ import SwiftData
 struct LevelListView: View {
     @State private var viewModel: LevelListViewModel
 
-    init(repository: StudySpaceRepository) {
+    private let repository: StudySpaceRepository
+    private let occupant: OccupantIdentifier
+
+    init(repository: StudySpaceRepository, occupant: OccupantIdentifier) {
+        self.repository = repository
+        self.occupant = occupant
         _viewModel = State(initialValue: LevelListViewModel(repository: repository))
     }
 
@@ -54,7 +59,7 @@ struct LevelListView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(for: StudyLevel.self) { level in
-            SeatPickerView(level: level)
+            SeatPickerView(level: level, repository: repository, occupant: occupant)
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -130,7 +135,10 @@ private func previewContainer() -> ModelContainer {
 #Preview {
     let container = previewContainer()
     NavigationStack {
-        LevelListView(repository: SwiftDataStudySpaceRepository(context: container.mainContext))
+        LevelListView(
+            repository: SwiftDataStudySpaceRepository(context: container.mainContext),
+            occupant: OccupantIdentifier(value: "preview-occupant")
+        )
     }
     .modelContainer(container)
 }

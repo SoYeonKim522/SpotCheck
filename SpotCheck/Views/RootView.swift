@@ -12,10 +12,15 @@ struct RootView: View {
     @Environment(\.modelContext) private var context
     @State private var isSeeded = false
 
+    private let occupant = DeviceOccupant.identifier()
+
     var body: some View {
         NavigationStack {
             if isSeeded {
-                LevelListView(repository: SwiftDataStudySpaceRepository(context: context))
+                LevelListView(
+                    repository: SwiftDataStudySpaceRepository(context: context),
+                    occupant: occupant
+                )
             }
         }
         .task {

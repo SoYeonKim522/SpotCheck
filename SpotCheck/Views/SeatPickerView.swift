@@ -13,8 +13,15 @@ struct SeatPickerView: View {
     @State private var requiresPowerOutlet = false
     @State private var requiresPartition = false
 
-    init(level: StudyLevel) {
-        _viewModel = State(initialValue: SeatPickerViewModel(level: level, now: .now))
+    init(level: StudyLevel, repository: StudySpaceRepository, occupant: OccupantIdentifier) {
+        _viewModel = State(
+            initialValue: SeatPickerViewModel(
+                level: level,
+                repository: repository,
+                occupant: occupant,
+                now: .now
+            )
+        )
     }
 
     private let columns = [GridItem(.adaptive(minimum: 60), spacing: 8)]
@@ -183,7 +190,11 @@ private func previewLevel() -> StudyLevel {
 
 #Preview {
     NavigationStack {
-        SeatPickerView(level: previewLevel())
+        SeatPickerView(
+            level: previewLevel(),
+            repository: SwiftDataStudySpaceRepository(context: seatPickerPreviewContainer.mainContext),
+            occupant: OccupantIdentifier(value: "preview-occupant")
+        )
     }
     .modelContainer(seatPickerPreviewContainer)
 }
