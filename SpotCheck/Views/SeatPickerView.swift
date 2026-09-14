@@ -166,7 +166,7 @@ struct SeatPickerView: View {
     private var filters: some View {
         ScrollView(.horizontal) {
             HStack(spacing: 8) {
-                filterChip("Power outlet", isOn: $requiresPowerOutlet)
+                filterChip("Power", isOn: $requiresPowerOutlet)
                 filterChip("Computer", isOn: $requiresComputer)
                 filterChip("Partition", isOn: $requiresPartition)
                 filterChip("Window", isOn: $requiresWindow)
@@ -293,10 +293,6 @@ private struct SeatDetailSheet: View {
         return names
     }
 
-    private var holdDuration: String {
-        SeatHoldPolicy.durationText
-    }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             VStack(alignment: .leading, spacing: 4) {
@@ -311,7 +307,7 @@ private struct SeatDetailSheet: View {
                     .font(.subheadline)
             }
 
-            Text("Your hold lasts \(holdDuration), then the seat frees itself.")
+            Text("Your seat will be held for \(SeatHoldPolicy.durationText), then released automatically.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
 
