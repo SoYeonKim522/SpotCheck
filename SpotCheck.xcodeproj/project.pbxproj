@@ -14,19 +14,11 @@
 			remoteGlobalIDString = 1720DB4A304EEFCD00FFE918;
 			remoteInfo = SpotCheck;
 		};
-		1720DB65304EEFD000FFE918 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 1720DB43304EEFCD00FFE918 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 1720DB4A304EEFCD00FFE918;
-			remoteInfo = SpotCheck;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		1720DB4B304EEFCD00FFE918 /* SpotCheck.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SpotCheck.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1720DB5A304EEFD000FFE918 /* SpotCheckTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpotCheckTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		1720DB64304EEFD000FFE918 /* SpotCheckUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpotCheckUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -38,11 +30,6 @@
 		1720DB5D304EEFD000FFE918 /* SpotCheckTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = SpotCheckTests;
-			sourceTree = "<group>";
-		};
-		1720DB67304EEFD000FFE918 /* SpotCheckUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = SpotCheckUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -62,13 +49,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		1720DB61304EEFD000FFE918 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -77,7 +57,6 @@
 			children = (
 				1720DB4D304EEFCD00FFE918 /* SpotCheck */,
 				1720DB5D304EEFD000FFE918 /* SpotCheckTests */,
-				1720DB67304EEFD000FFE918 /* SpotCheckUITests */,
 				1720DB4C304EEFCD00FFE918 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -87,7 +66,6 @@
 			children = (
 				1720DB4B304EEFCD00FFE918 /* SpotCheck.app */,
 				1720DB5A304EEFD000FFE918 /* SpotCheckTests.xctest */,
-				1720DB64304EEFD000FFE918 /* SpotCheckUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -140,29 +118,6 @@
 			productReference = 1720DB5A304EEFD000FFE918 /* SpotCheckTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		1720DB63304EEFD000FFE918 /* SpotCheckUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 1720DB74304EEFD000FFE918 /* Build configuration list for PBXNativeTarget "SpotCheckUITests" */;
-			buildPhases = (
-				1720DB60304EEFD000FFE918 /* Sources */,
-				1720DB61304EEFD000FFE918 /* Frameworks */,
-				1720DB62304EEFD000FFE918 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				1720DB66304EEFD000FFE918 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				1720DB67304EEFD000FFE918 /* SpotCheckUITests */,
-			);
-			name = SpotCheckUITests;
-			packageProductDependencies = (
-			);
-			productName = SpotCheckUITests;
-			productReference = 1720DB64304EEFD000FFE918 /* SpotCheckUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -177,10 +132,6 @@
 						CreatedOnToolsVersion = 26.3;
 					};
 					1720DB59304EEFD000FFE918 = {
-						CreatedOnToolsVersion = 26.3;
-						TestTargetID = 1720DB4A304EEFCD00FFE918;
-					};
-					1720DB63304EEFD000FFE918 = {
 						CreatedOnToolsVersion = 26.3;
 						TestTargetID = 1720DB4A304EEFCD00FFE918;
 					};
@@ -202,7 +153,6 @@
 			targets = (
 				1720DB4A304EEFCD00FFE918 /* SpotCheck */,
 				1720DB59304EEFD000FFE918 /* SpotCheckTests */,
-				1720DB63304EEFD000FFE918 /* SpotCheckUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -216,13 +166,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		1720DB58304EEFD000FFE918 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		1720DB62304EEFD000FFE918 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -246,13 +189,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		1720DB60304EEFD000FFE918 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -260,11 +196,6 @@
 			isa = PBXTargetDependency;
 			target = 1720DB4A304EEFCD00FFE918 /* SpotCheck */;
 			targetProxy = 1720DB5B304EEFD000FFE918 /* PBXContainerItemProxy */;
-		};
-		1720DB66304EEFD000FFE918 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 1720DB4A304EEFCD00FFE918 /* SpotCheck */;
-			targetProxy = 1720DB65304EEFD000FFE918 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -498,46 +429,6 @@
 			};
 			name = Release;
 		};
-		1720DB75304EEFD000FFE918 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = GYWY2SM773;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.soyeonkim.SpotCheckUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = SpotCheck;
-			};
-			name = Debug;
-		};
-		1720DB76304EEFD000FFE918 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = GYWY2SM773;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.soyeonkim.SpotCheckUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = SpotCheck;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -564,15 +455,6 @@
 			buildConfigurations = (
 				1720DB72304EEFD000FFE918 /* Debug */,
 				1720DB73304EEFD000FFE918 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		1720DB74304EEFD000FFE918 /* Build configuration list for PBXNativeTarget "SpotCheckUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				1720DB75304EEFD000FFE918 /* Debug */,
-				1720DB76304EEFD000FFE918 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
