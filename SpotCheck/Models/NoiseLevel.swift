@@ -8,7 +8,7 @@
 import Foundation
 
 /// The noise level assigned to a zone by the university.
-enum NoiseLevel: String, Codable, CaseIterable {
+enum NoiseLevel: String, Codable {
     case silent
     case quiet
     case collaborative

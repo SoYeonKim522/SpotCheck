@@ -11,6 +11,6 @@ import Foundation
 ///
 /// Campus buildings are open to everyone, so the person may not be a student.
 /// The app only needs to tell different check-ins apart, not know who the person is.
-struct OccupantIdentifier: Hashable, Codable {
+struct OccupantIdentifier: Hashable {
     let value: String
 }
