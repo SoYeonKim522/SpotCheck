@@ -8,6 +8,10 @@
 import Foundation
 import SwiftData
 
+/// A named area within a level, such as a reading room or open seating.
+///
+/// `noiseLevel` uses the university's official designation. If the university
+/// has not provided one, it is `nil`. It is not based on personal opinions.
 @Model
 final class StudyZone {
     var name: String

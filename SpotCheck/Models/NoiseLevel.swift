@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// The noise level assigned to a zone by the university.
 enum NoiseLevel: String, Codable, CaseIterable {
     case silent
     case quiet

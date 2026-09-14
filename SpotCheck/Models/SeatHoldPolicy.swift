@@ -7,15 +7,18 @@
 
 import Foundation
 
-/// How long a seat stays held, and how long it can be held for in one sitting.
-
-/// A check-in expires once `duration` has passed, automatically freeing the seat.
-/// Extending a hold adds another `duration`,
-/// but a single check-in can never run longer than `maximumDuration`from the moment it was made.
-
+/// Defines how long a seat can be held and how long one student can keep it.
+///
+/// A check-in expires after `duration` and the seat becomes available again.
+/// Each extension adds another `duration`, but a single check-in cannot last longer
+/// than `maximumDuration` from the time it was made.
 enum SeatHoldPolicy {
     static let duration: TimeInterval = 60 * 60
     static let maximumDuration: TimeInterval = 3 * 60 * 60
+
+    static func latestExpiry(for checkedInAt: Date) -> Date {
+        checkedInAt.addingTimeInterval(maximumDuration)
+    }
 
     static var durationText: String {
         text(for: duration)

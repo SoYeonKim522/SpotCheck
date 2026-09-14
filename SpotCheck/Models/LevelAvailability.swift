@@ -7,18 +7,19 @@
 
 import Foundation
 
-/// Free seats on one level at a single moment, derived from its check-ins rather than stored.
+/// The number of free seats on one level at a single moment.
 ///
-/// `free` excludes seats held by an unexpired check-in; an expired one no longer holds its seat.
-/// `lastUpdatedAt` is the level's most recent check-in or release, `nil` if there is none.
-/// A free-seat count is never shown without it.
+/// The count is calculated from the level's check-ins rather than stored.
+/// `free` does not include seats held by a check-in that has not expired yet.
+/// `lastUpdatedAt` records when the numbers were read. It is kept in the same type
+/// so that a count is always shown with the time it was read.
 ///
-/// /// A value type because it is recomputed on every read and never persisted.
-/// It refers to the `StudyLevel` so a screen can navigate to that level's seats.
-
+/// A struct is used because these values are calculated on every read and are not persisted.
+/// It also keeps a reference to its `StudyLevel` so a screen can move from a row to that
+/// level's seats.
 struct LevelAvailability {
     let level: StudyLevel
     let free: Int
     let total: Int
-    let lastUpdatedAt: Date?
+    let lastUpdatedAt: Date
 }

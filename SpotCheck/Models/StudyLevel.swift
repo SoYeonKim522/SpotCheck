@@ -8,6 +8,11 @@
 import Foundation
 import SwiftData
 
+/// One floor of a building, which students can choose from.
+///
+/// Floors can differ in noise, zone type, and seat features, so availability is shown
+/// separately for each floor rather than for the whole building.
+/// `capacity` is calculated from the zones when needed, so it always stays up to date.
 @Model
 final class StudyLevel {
     var number: Int

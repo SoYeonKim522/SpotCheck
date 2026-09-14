@@ -8,6 +8,16 @@
 import Foundation
 import SwiftData
 
+/// A student's claim on a seat. Availability counts are calculated from these records.
+///
+/// A check-in expires after `SeatHoldPolicy.duration` and can be extended up to
+/// `SeatHoldPolicy.maximumDuration` in a single check-in.
+/// Students can also give up the seat early.
+/// When the student leaves the seat, `releasedAt` records when the check-in ended.
+/// Only the student who made the check-in can release it.
+///
+/// A class is used because SwiftData persists this type and its dates can change over time.
+/// The other persisted entities are classes for the same reason.
 @Model
 final class SeatCheckIn {
     var occupantIdentifier: String

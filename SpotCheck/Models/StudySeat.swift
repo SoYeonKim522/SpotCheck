@@ -8,6 +8,13 @@
 import Foundation
 import SwiftData
 
+/// A single seat that a student can check in to.
+///
+/// A seat is considered free when it has no active check-ins.
+/// The app checks the seat's current check-ins whenever it needs to know
+/// whether the seat is available, rather than storing its availability separately.
+/// This means an expired check-in frees the seat automatically, without needing
+/// a timer or a separate cleanup process.
 @Model
 final class StudySeat {
     var label: String
