@@ -64,7 +64,7 @@ enum SeedData {
 
         var occupantNumber = 0
         for (studyLevel, occupiedSeats) in seatsHeld {
-            for seat in studyLevel.zones.flatMap(\.seats).prefix(occupiedSeats) {
+            for seat in spread(occupiedSeats, over: studyLevel.zones.flatMap(\.seats)) {
                 occupantNumber += 1
                 let checkedInAt = now.addingTimeInterval(-Double(1 + occupantNumber % 25) * 60)
                 context.insert(
@@ -78,17 +78,24 @@ enum SeedData {
             }
         }
 
-        let expiredAt = now.addingTimeInterval(-74 * 60)
-        context.insert(
-            SeatCheckIn(
-                checkedInBy: OccupantIdentifier(value: "seed-occupant-expired"),
-                seat: building2Level9Library.seats[17],
-                checkedInAt: expiredAt,
-                expiresAt: expiredAt.addingTimeInterval(SeatHoldPolicy.duration)
+        if let longVacatedSeat = building2Level9Library.seats.last {
+            let expiredAt = now.addingTimeInterval(-74 * 60)
+            context.insert(
+                SeatCheckIn(
+                    checkedInBy: OccupantIdentifier(value: "seed-occupant-expired"),
+                    seat: longVacatedSeat,
+                    checkedInAt: expiredAt,
+                    expiresAt: expiredAt.addingTimeInterval(SeatHoldPolicy.duration)
+                )
             )
-        )
+        }
 
         try context.save()
+    }
+
+    private static func spread(_ count: Int, over seats: [StudySeat]) -> [StudySeat] {
+        guard count > 0, count <= seats.count else { return seats }
+        return (0..<count).map { seats[$0 * seats.count / count] }
     }
 
     private static func building(_ name: String, _ address: String, _ levels: [StudyLevel]) -> CampusBuilding {
