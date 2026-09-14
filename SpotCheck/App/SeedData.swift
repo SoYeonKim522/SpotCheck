@@ -45,7 +45,8 @@ enum SeedData {
         let building11Level6 = level(6, [zone("Open Study", .collaborative, seats("E6", 10, isByWindow: true, isSharedTable: true))])
         let building11 = building("Building 11", "81 Broadway, Ultimo", [building11Level5, building11Level6])
 
-        for campusBuilding in [building2, building1, building11] {
+        for (order, campusBuilding) in [building2, building1, building11].enumerated() {
+            campusBuilding.displayOrder = order
             context.insert(campusBuilding)
         }
 

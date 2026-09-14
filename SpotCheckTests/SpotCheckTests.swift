@@ -211,12 +211,12 @@ struct SpotCheckTests {
         #expect(LevelFullness(free: 0, total: 0) == .nearlyFull)
     }
 
-    @Test func theStoreListsBuildingsInTheOrderStudentsReadThem() throws {
-        insertBuilding(named: "Building 11")
-        insertBuilding(named: "Building 2")
-        insertBuilding(named: "Building 1")
+    @Test func theStoreListsBuildingsInTheOrderTheCampusPutsThem() throws {
+        insertBuilding(named: "Building 11", displayOrder: 2)
+        insertBuilding(named: "Building 1", displayOrder: 1)
+        insertBuilding(named: "Building 2", displayOrder: 0)
 
-        #expect(try repository.buildings().map(\.name) == ["Building 1", "Building 2", "Building 11"])
+        #expect(try repository.buildings().map(\.name) == ["Building 2", "Building 1", "Building 11"])
     }
 
     @Test func theStoreFindsAnOccupantsCurrentSeatButNotAnExpiredOne() throws {
@@ -258,9 +258,11 @@ struct SpotCheckTests {
     @discardableResult
     private func insertBuilding(
         named name: String = "Building 2",
+        displayOrder: Int = 0,
         levels: [(number: Int, seats: Int)] = [(5, 4)]
     ) -> CampusBuilding {
         let building = CampusBuilding(name: name, address: "61 Broadway, Ultimo")
+        building.displayOrder = displayOrder
         building.levels = levels.map { number, seatCount in
             let level = StudyLevel(number: number)
             let zone = StudyZone(name: "Reading Room", noiseLevel: .silent)

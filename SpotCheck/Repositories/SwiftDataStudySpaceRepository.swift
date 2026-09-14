@@ -13,7 +13,7 @@ struct SwiftDataStudySpaceRepository: StudySpaceRepository {
 
     func buildings() throws -> [CampusBuilding] {
         try context.fetch(FetchDescriptor<CampusBuilding>())
-            .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+            .sorted { $0.displayOrder < $1.displayOrder }
     }
 
     func activeCheckIn(for occupant: OccupantIdentifier, at moment: Date) throws -> SeatCheckIn? {

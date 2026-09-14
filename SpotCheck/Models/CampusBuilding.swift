@@ -15,6 +15,7 @@ import SwiftData
 final class CampusBuilding {
     @Attribute(.unique) var name: String
     var address: String
+    var displayOrder: Int = 0
 
     @Relationship(deleteRule: .cascade, inverse: \StudyLevel.building)
     var levels: [StudyLevel] = []
