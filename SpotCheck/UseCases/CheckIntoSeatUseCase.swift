@@ -15,8 +15,8 @@ struct CheckIntoSeatUseCase {
         occupant: OccupantIdentifier,
         now: Date
     ) throws -> SeatCheckIn {
-        guard try repository.activeCheckIn(for: occupant, at: now) == nil else {
-            throw CheckIntoSeatError.occupantAlreadyHoldsASeat
+        if let held = try repository.activeCheckIn(for: occupant, at: now) {
+            throw CheckIntoSeatError.occupantAlreadyHoldsASeat(heldSeat: held.seat)
         }
         guard seat.activeCheckIn(at: now) == nil else {
             throw CheckIntoSeatError.seatIsTaken
@@ -35,19 +35,24 @@ struct CheckIntoSeatUseCase {
 }
 
 enum CheckIntoSeatError: LocalizedError {
-    case occupantAlreadyHoldsASeat
+    case occupantAlreadyHoldsASeat(heldSeat: StudySeat?)
     case seatIsTaken
 
     var errorDescription: String? {
         switch self {
-        case .occupantAlreadyHoldsASeat: "You already hold a seat."
-        case .seatIsTaken: "Someone else checked in to this seat first."
+        case let .occupantAlreadyHoldsASeat(heldSeat):
+            guard let heldSeat, let level = heldSeat.zone?.level else {
+                return "You already hold a seat."
+            }
+            return "You're already checked in on Level \(level.number), seat \(heldSeat.label)."
+        case .seatIsTaken:
+            return "Someone else checked in to this seat first."
         }
     }
 
     var recoverySuggestion: String? {
         switch self {
-        case .occupantAlreadyHoldsASeat: "Release the seat you are holding, then check in here."
+        case .occupantAlreadyHoldsASeat: "Release that seat first."
         case .seatIsTaken: "Refresh to see which seats are free now."
         }
     }
