@@ -59,7 +59,6 @@ final class SeatPickerViewModel {
 
     func select(_ seat: StudySeat) {
         guard isFree(seat) else { return }
-        checkInError = nil
         selectedSeat = seat
     }
 
@@ -75,7 +74,6 @@ final class SeatPickerViewModel {
     func checkIn(to seat: StudySeat, now: Date) {
         do {
             _ = try checkIntoSeat.execute(seat: seat, occupant: occupant, now: now)
-            checkInError = nil
             refresh(now: now)
             onCheckIn()
         } catch let error as CheckIntoSeatError {
