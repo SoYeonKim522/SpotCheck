@@ -16,6 +16,10 @@ import SwiftData
 /// When the student leaves the seat, `releasedAt` records when the check-in ended.
 /// Only the student who made the check-in can release it.
 ///
+/// `occupantIdentifier` holds the identifier as a plain string because a SwiftData
+/// predicate can only compare stored values of basic types. `checkedInBy` wraps it back
+/// into an `OccupantIdentifier`, and the rest of the app uses that.
+///
 /// A class is used because SwiftData persists this type and its dates can change over time.
 /// The other persisted entities are classes for the same reason.
 @Model
