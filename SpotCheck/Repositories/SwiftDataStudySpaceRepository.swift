@@ -27,11 +27,12 @@ struct SwiftDataStudySpaceRepository: StudySpaceRepository {
         return try context.fetch(descriptor).first
     }
 
-    func add(_ checkIn: SeatCheckIn) {
+    func add(_ checkIn: SeatCheckIn) throws {
         context.insert(checkIn)
+        try context.save()
     }
 
-    func save() throws {
+    func update(_ checkIn: SeatCheckIn) throws {
         try context.save()
     }
 }

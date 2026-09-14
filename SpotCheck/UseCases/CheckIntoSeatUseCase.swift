@@ -28,8 +28,7 @@ struct CheckIntoSeatUseCase {
             checkedInAt: now,
             expiresAt: now.addingTimeInterval(SeatHoldPolicy.duration)
         )
-        repository.add(checkIn)
-        try repository.save()
+        try repository.add(checkIn)
         return checkIn
     }
 }

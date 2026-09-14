@@ -26,7 +26,7 @@ struct ReleaseSeatUseCase {
         }
 
         checkIn.releasedAt = now
-        try repository.save()
+        try repository.update(checkIn)
     }
 }
 

@@ -34,7 +34,7 @@ struct ExtendHoldUseCase {
             checkIn.expiresAt.addingTimeInterval(SeatHoldPolicy.duration),
             latestExpiry
         )
-        try repository.save()
+        try repository.update(checkIn)
     }
 }
 
