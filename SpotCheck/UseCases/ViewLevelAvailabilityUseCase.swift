@@ -20,9 +20,7 @@ struct ViewLevelAvailabilityUseCase {
             level: level,
             free: seats.filter { $0.activeCheckIn(at: now) == nil }.count,
             total: level.capacity,
-            lastUpdatedAt: seats.flatMap(\.checkIns)
-                .map { $0.releasedAt ?? $0.checkedInAt }
-                .max()
+            lastUpdatedAt: now
         )
     }
 }
