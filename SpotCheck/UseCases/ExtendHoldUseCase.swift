@@ -25,7 +25,7 @@ struct ExtendHoldUseCase {
             throw ExtendHoldError.holdHasAlreadyExpired
         }
 
-        let latestExpiry = checkIn.checkedInAt.addingTimeInterval(SeatHoldPolicy.maximumDuration)
+        let latestExpiry = SeatHoldPolicy.latestExpiry(for: checkIn.checkedInAt)
         guard checkIn.expiresAt < latestExpiry else {
             throw ExtendHoldError.holdIsAtItsMaximum
         }

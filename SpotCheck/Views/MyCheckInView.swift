@@ -59,6 +59,10 @@ struct MyCheckInView: View {
                     .foregroundStyle(.secondary)
                 Text("Checked in: \(checkIn.checkedInAt.formatted(date: .omitted, time: .shortened))")
                     .foregroundStyle(.secondary)
+                    .padding(.top, 8)
+                Text("You can hold this seat for \(SeatHoldPolicy.maximumDurationText) max")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
             }
 
             Spacer()
@@ -82,18 +86,12 @@ struct MyCheckInView: View {
                 .buttonStyle(.bordered)
                 .controlSize(.large)
                 .alert(
-                    viewModel.actionError?.errorDescription ?? "",
-                    isPresented: actionFailed,
-                    actions: { Button("OK", role: .cancel) {} },
-                    message: { Text(viewModel.actionError?.recoverySuggestion ?? "") }
-                )
-                .alert(
                     "Release \(seat.label)?",
                     isPresented: $isConfirmingRelease
                 ) {
                     Button("Release seat", role: .destructive) {
                         viewModel.release(now: .now)
-                        if viewModel.checkIn == nil { dismiss() }
+                        if viewModel.actionError == nil { dismiss() }
                     }
                     Button("Keep seat", role: .cancel) {}
                 } message: {
@@ -102,13 +100,6 @@ struct MyCheckInView: View {
             }
         }
         .padding(24)
-    }
-
-    private var actionFailed: Binding<Bool> {
-        Binding(
-            get: { viewModel.actionError != nil },
-            set: { if !$0 { viewModel.clearActionError() } }
-        )
     }
 
     private var empty: some View {
