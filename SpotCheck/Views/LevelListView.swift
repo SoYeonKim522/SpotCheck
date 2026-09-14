@@ -93,16 +93,12 @@ struct LevelListView: View {
 private struct LevelAvailabilityRow: View {
     let availability: LevelAvailability
 
-    private var freeFraction: Double {
-        availability.total == 0 ? 0 : Double(availability.free) / Double(availability.total)
-    }
-
-    private var isNearlyFull: Bool {
-        freeFraction < 0.2
-    }
-
     private var status: Color {
-        freeFraction >= 0.5 ? .green : (isNearlyFull ? .red : .yellow)
+        switch availability.fullness {
+        case .plenty: .green
+        case .fillingUp: .yellow
+        case .nearlyFull: .red
+        }
     }
 
     var body: some View {
@@ -122,7 +118,7 @@ private struct LevelAvailabilityRow: View {
 
             Text("\(availability.free)/\(availability.total)")
                 .monospacedDigit()
-                .foregroundStyle(isNearlyFull ? Color.red : .primary)
+                .foregroundStyle(availability.fullness == .nearlyFull ? Color.red : .primary)
                 .layoutPriority(1)
         }
         .padding(.vertical, 4)

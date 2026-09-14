@@ -15,7 +15,6 @@ struct SeatPickerView: View {
     @State private var requiresPartition = false
     @State private var requiresWindow = false
     @State private var requiresSharedTable = false
-    @State private var sheetHeight: CGFloat = 320
 
     init(
         level: StudyLevel,
@@ -95,8 +94,7 @@ struct SeatPickerView: View {
                 levelNumber: viewModel.level.number,
                 checkIn: { viewModel.checkIn(to: seat, now: .now) }
             )
-            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { sheetHeight = $0 }
-            .presentationDetents([.height(sheetHeight)])
+            .presentationDetents([.medium])
             .alert(
                 viewModel.checkInError?.errorDescription ?? "",
                 isPresented: checkInFailed,

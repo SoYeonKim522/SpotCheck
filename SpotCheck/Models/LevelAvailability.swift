@@ -22,4 +22,9 @@ struct LevelAvailability {
     let free: Int
     let total: Int
     let lastUpdatedAt: Date
+
+    /// How full this level is. See `LevelFullness`.
+    var fullness: LevelFullness {
+        LevelFullness(free: free, total: total)
+    }
 }
