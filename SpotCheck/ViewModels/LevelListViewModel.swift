@@ -16,13 +16,10 @@ final class LevelListViewModel {
     private(set) var buildings: [CampusBuilding] = []
     private(set) var availabilities: [LevelAvailability] = []
     private(set) var selectedBuilding: CampusBuilding?
+    private(set) var lastUpdatedAt = Date.now
 
     init(repository: StudySpaceRepository) {
         self.repository = repository
-    }
-
-    var lastUpdatedAt: Date? {
-        availabilities.compactMap(\.lastUpdatedAt).max()
     }
 
     func select(building: CampusBuilding, now: Date) {
@@ -31,8 +28,14 @@ final class LevelListViewModel {
     }
 
     func refresh(now: Date) {
-        buildings = (try? repository.buildings()) ?? []
+        do {
+            buildings = try repository.buildings()
+        } catch {
+            assertionFailure("Buildings could not be loaded: \(error)")
+            buildings = []
+        }
         selectedBuilding = selectedBuilding ?? buildings.first
         availabilities = selectedBuilding.map { viewLevelAvailability.execute(building: $0, now: now) } ?? []
+        lastUpdatedAt = now
     }
 }

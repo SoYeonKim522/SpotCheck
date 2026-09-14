@@ -44,19 +44,32 @@ struct RootView: View {
                 }
             }
         }
+        .alert(
+            hold?.actionError?.errorDescription ?? "",
+            isPresented: actionFailed,
+            actions: { Button("OK", role: .cancel) {} },
+            message: { Text(hold?.actionError?.recoverySuggestion ?? "") }
+        )
         .task {
             do {
                 try SeedData.loadIfEmpty(into: context, now: .now)
-                let model = MyCheckInViewModel(
-                    repository: SwiftDataStudySpaceRepository(context: context),
-                    occupant: occupant
-                )
-                model.refresh(now: .now)
-                hold = model
             } catch {
                 assertionFailure("Seed data failed to load: \(error)")
             }
+            let model = MyCheckInViewModel(
+                repository: SwiftDataStudySpaceRepository(context: context),
+                occupant: occupant
+            )
+            model.refresh(now: .now)
+            hold = model
         }
+    }
+
+    private var actionFailed: Binding<Bool> {
+        Binding(
+            get: { hold?.actionError != nil },
+            set: { if !$0 { hold?.clearActionError() } }
+        )
     }
 }
 

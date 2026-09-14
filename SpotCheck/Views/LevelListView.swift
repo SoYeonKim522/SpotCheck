@@ -23,6 +23,34 @@ struct LevelListView: View {
     }
 
     var body: some View {
+        Group {
+            if viewModel.buildings.isEmpty {
+                ContentUnavailableView(
+                    "No study spaces available",
+                    systemImage: "building.2",
+                    description: Text("SpotCheck has no buildings to show. Reopen the app to try again.")
+                )
+            } else {
+                levels
+            }
+        }
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(for: StudyLevel.self) { level in
+            SeatPickerView(level: level, repository: repository, occupant: occupant, onCheckIn: onCheckIn)
+        }
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    viewModel.refresh(now: .now)
+                } label: {
+                    Label("Refresh availability", systemImage: "arrow.clockwise")
+                }
+            }
+        }
+        .onAppear { viewModel.refresh(now: .now) }
+    }
+
+    private var levels: some View {
         VStack(alignment: .leading, spacing: 0) {
             VStack(alignment: .leading, spacing: 2) {
                 Menu {
@@ -54,29 +82,11 @@ struct LevelListView: View {
                         }
                     }
                 } footer: {
-                    footer
+                    Text(LastUpdated.text(viewModel.lastUpdatedAt, at: .now))
                 }
             }
             .refreshable { viewModel.refresh(now: .now) }
         }
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationDestination(for: StudyLevel.self) { level in
-            SeatPickerView(level: level, repository: repository, occupant: occupant, onCheckIn: onCheckIn)
-        }
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    viewModel.refresh(now: .now)
-                } label: {
-                    Label("Refresh availability", systemImage: "arrow.clockwise")
-                }
-            }
-        }
-        .onAppear { viewModel.refresh(now: .now) }
-    }
-
-    private var footer: some View {
-        Text(LastUpdated.text(viewModel.lastUpdatedAt, at: .now))
     }
 }
 

@@ -47,7 +47,7 @@ enum ReleaseSeatError: LocalizedError {
         switch self {
         case .checkInBelongsToAnotherOccupant: "You can only release a seat you checked in to."
         case .seatWasAlreadyReleased: "It is free for someone else now."
-        case .holdHasAlreadyExpired: "The seat freed itself an hour after you checked in."
+        case .holdHasAlreadyExpired: "Check in again if the seat is still free."
         }
     }
 }

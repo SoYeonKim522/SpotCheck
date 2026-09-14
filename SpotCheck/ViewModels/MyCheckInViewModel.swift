@@ -30,7 +30,12 @@ final class MyCheckInViewModel {
     }
 
     func refresh(now: Date) {
-        checkIn = try? repository.activeCheckIn(for: occupant, at: now)
+        do {
+            checkIn = try repository.activeCheckIn(for: occupant, at: now)
+        } catch {
+            assertionFailure("The current check-in could not be loaded: \(error)")
+            checkIn = nil
+        }
     }
 
     func extend(now: Date) {
