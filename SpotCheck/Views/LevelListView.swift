@@ -82,7 +82,9 @@ struct LevelListView: View {
                         }
                     }
                 } footer: {
-                    Text(LastUpdated.text(viewModel.lastUpdatedAt, at: .now))
+                    if let lastUpdatedAt = viewModel.lastUpdatedAt {
+                        Text(LastUpdated.text(lastUpdatedAt, at: .now))
+                    }
                 }
             }
             .refreshable { viewModel.refresh(now: .now) }

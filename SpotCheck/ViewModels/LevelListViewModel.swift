@@ -16,7 +16,10 @@ final class LevelListViewModel {
     private(set) var buildings: [CampusBuilding] = []
     private(set) var availabilities: [LevelAvailability] = []
     private(set) var selectedBuilding: CampusBuilding?
-    private(set) var lastUpdatedAt = Date.now
+
+    var lastUpdatedAt: Date? {
+        availabilities.first?.lastUpdatedAt
+    }
 
     init(repository: StudySpaceRepository) {
         self.repository = repository
@@ -36,6 +39,5 @@ final class LevelListViewModel {
         }
         selectedBuilding = selectedBuilding ?? buildings.first
         availabilities = selectedBuilding.map { viewLevelAvailability.execute(building: $0, now: now) } ?? []
-        lastUpdatedAt = now
     }
 }
