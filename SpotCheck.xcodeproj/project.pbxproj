@@ -80,6 +80,13 @@
 			);
 			target = 172699B3306BC707004EB7B0 /* SpotCheckNotificationContent */;
 		};
+		172699CE306BCF17004EB7B0 /* Exceptions for "SpotCheck" folder in "SpotCheckWidget" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Shared/AppGroup.swift,
+			);
+			target = 17269999306BC6D9004EB7B0 /* SpotCheckWidget */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -101,6 +108,9 @@
 		};
 		17805D37306B8B6500789AC6 /* SpotCheck */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				172699CE306BCF17004EB7B0 /* Exceptions for "SpotCheck" folder in "SpotCheckWidget" target */,
+			);
 			path = SpotCheck;
 			sourceTree = "<group>";
 		};
