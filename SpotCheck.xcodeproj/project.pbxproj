@@ -13,6 +13,7 @@
 		172699B6306BC707004EB7B0 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 172699B5306BC707004EB7B0 /* UserNotifications.framework */; };
 		172699B8306BC707004EB7B0 /* UserNotificationsUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 172699B7306BC707004EB7B0 /* UserNotificationsUI.framework */; };
 		172699C2306BC707004EB7B0 /* SpotCheckNotificationContent.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 172699B4306BC707004EB7B0 /* SpotCheckNotificationContent.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		172699D1306BD4DD004EB7B0 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 172699D0306BD4DD004EB7B0 /* Supabase */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -144,6 +145,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				172699D1306BD4DD004EB7B0 /* Supabase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -258,6 +260,7 @@
 			);
 			name = SpotCheck;
 			packageProductDependencies = (
+				172699D0306BD4DD004EB7B0 /* Supabase */,
 			);
 			productName = SpotCheck;
 			productReference = 17805D35306B8B6500789AC6 /* SpotCheck.app */;
@@ -320,6 +323,9 @@
 			);
 			mainGroup = 17805D2C306B8B6500789AC6;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				172699CF306BD4DD004EB7B0 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 17805D36306B8B6500789AC6 /* Products */;
 			projectDirPath = "";
@@ -814,6 +820,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		172699CF306BD4DD004EB7B0 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		172699D0306BD4DD004EB7B0 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 172699CF306BD4DD004EB7B0 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 17805D2D306B8B6500789AC6 /* Project object */;
 }

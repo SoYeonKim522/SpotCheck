@@ -10,6 +10,7 @@ struct RootView: View {
             Button("Write to App Group", action: write)
         }
         .padding()
+        .task { await SupabaseSpike.run() }
     }
 
     private func write() {
