@@ -49,6 +49,9 @@ create index seat_check_ins_active_by_occupant
     on seat_check_ins (occupant_id, expires_at)
     where released_at is null;
 
+grant select on buildings, levels, zones, seats, seat_check_ins to authenticated;
+grant insert, update on seat_check_ins to authenticated;
+
 alter table buildings enable row level security;
 alter table levels enable row level security;
 alter table zones enable row level security;
