@@ -1,34 +1,56 @@
 import SwiftUI
-import WidgetKit
 
 struct RootView: View {
-    @State private var status = "Nothing written yet"
+    @State private var session = AuthSession(repository: SupabaseAuthenticationRepository())
+    @State private var hasRestored = false
 
     var body: some View {
-        VStack(spacing: 16) {
-            Text(status)
-            Button("Write to App Group", action: write)
+        Group {
+            if !hasRestored {
+                ProgressView()
+            } else if session.isSignedIn {
+                FindASeatPlaceholder()
+            } else {
+                SignInView()
+            }
         }
-        .padding()
-        .task { await SupabaseSpike.run() }
-    }
-
-    private func write() {
-        guard let url = AppGroup.containerURL?.appending(path: "spike.txt") else {
-            status = "No App Group container"
-            return
-        }
-        let text = "Written at \(Date.now.formatted(date: .omitted, time: .standard))"
-        do {
-            try text.write(to: url, atomically: true, encoding: .utf8)
-            status = text
-            WidgetCenter.shared.reloadAllTimelines()
-        } catch {
-            status = error.localizedDescription
+        .environment(session)
+        .task {
+            await session.restore()
+            hasRestored = true
         }
     }
 }
 
-#Preview {
-    RootView()
+private struct FindASeatPlaceholder: View {
+    @Environment(AuthSession.self) private var session
+
+    @State private var counts: SupabaseSpike.Counts?
+    @State private var failure: String?
+
+    var body: some View {
+        VStack(spacing: 12) {
+            if let counts {
+                Text(counts.signedInAs)
+                Text("\(counts.seats) seats")
+                Text("\(counts.activeCheckIns) held right now")
+            } else if let failure {
+                Text(failure)
+                    .textSelection(.enabled)
+            } else {
+                ProgressView()
+            }
+
+            Button("Sign out") {
+                Task { await session.signOut() }
+            }
+        }
+        .task {
+            do {
+                counts = try await SupabaseSpike.readCounts()
+            } catch {
+                failure = error.localizedDescription
+            }
+        }
+    }
 }
