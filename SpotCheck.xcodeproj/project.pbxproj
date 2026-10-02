@@ -84,7 +84,10 @@
 		172699CE306BCF17004EB7B0 /* Exceptions for "SpotCheck" folder in "SpotCheckWidget" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Models/LevelFullness.swift,
 				Shared/AppGroup.swift,
+				Shared/AvailabilitySnapshot.swift,
+				Shared/AvailabilitySnapshotStore.swift,
 			);
 			target = 17269999306BC6D9004EB7B0 /* SpotCheckWidget */;
 		};
