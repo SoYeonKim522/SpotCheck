@@ -13,8 +13,12 @@ struct CheckIntoSeatUseCase {
     /// `now`. After the check-in is added, the hold is read back so the reminder and the widget get
     /// the seat's location, which the check-in on its own does not carry.
     func execute(seat: StudySeat, occupant: OccupantIdentifier, now: Date) async throws -> SeatHold {
-        // TODO: if the occupant already holds a seat, throw occupantAlreadyHoldsASeat(thatHold)
-        // TODO: if the seat is already taken, throw seatIsTaken
+        if let heldSeat = try await repository.activeHold(for: occupant, at: now) {
+            throw CheckIntoSeatError.occupantAlreadyHoldsASeat(heldSeat)
+        }
+        if try await repository.activeCheckIn(onSeat: seat.id, at: now) != nil {
+            throw CheckIntoSeatError.seatIsTaken
+        }
 
         let checkIn = SeatCheckIn(
             id: UUID(),
@@ -26,10 +30,9 @@ struct CheckIntoSeatUseCase {
         )
         try await repository.add(checkIn)
 
-        // TODO: the add landed but the read back can still fail or return nothing. Decide how to
-        // surface a write that succeeded without a hold to show.
         guard let hold = try await repository.activeHold(for: occupant, at: now) else {
-            throw CheckIntoSeatError.seatIsTaken
+            assertionFailure("Check-in was added but could not be read back for \(occupant).")
+            throw URLError(.cannotParseResponse)
         }
 
         reminders.scheduleReminder(for: hold)
@@ -49,12 +52,20 @@ enum CheckIntoSeatError: LocalizedError {
     case seatIsTaken
 
     var errorDescription: String? {
-        // TODO
-        nil
+        switch self {
+        case .occupantAlreadyHoldsASeat(let hold):
+            return "You're already checked in on Level \(hold.levelNumber), seat \(hold.seatLabel)."
+        case .seatIsTaken:
+            return "Someone just took this seat."
+        }
     }
 
     var recoverySuggestion: String? {
-        // TODO
-        nil
+        switch self {
+        case .occupantAlreadyHoldsASeat:
+            return "Release that seat first."
+        case .seatIsTaken:
+            return "Pick another free seat on this level."
+        }
     }
 }
