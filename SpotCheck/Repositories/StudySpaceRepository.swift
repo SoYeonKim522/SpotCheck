@@ -13,8 +13,9 @@ protocol StudySpaceRepository {
     /// The buildings a student can choose between, in the order they should be shown.
     func buildings() async throws -> [CampusBuilding]
 
-    /// Free and total seats for every level of a building, each stamped with `moment`.
-    func levelAvailability(inBuilding buildingID: UUID, at moment: Date) async throws -> [LevelAvailability]
+    /// Every level of a building in number order, with its zones, seats and the check-ins active at `moment`.
+    /// The caller(ViewLevelAvailabilityUseCase) counts the free seats.
+    func levels(inBuilding buildingID: UUID, at moment: Date) async throws -> [StudyLevel]
 
     /// The zones of one level with their seats, carrying only the check-ins active at `moment`.
     func zones(onLevel levelID: UUID, at moment: Date) async throws -> [StudyZone]

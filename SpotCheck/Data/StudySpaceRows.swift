@@ -24,12 +24,14 @@ struct LevelRow: Decodable {
     let zones: [ZoneRow]?
 
     var level: StudyLevel {
-        StudyLevel(id: id, buildingID: buildingId, number: number)
-    }
-
-    var seatCount: (free: Int, total: Int) {
-        let seats = (zones ?? []).flatMap(\.seats)
-        return (seats.filter(\.seatCheckIns.isEmpty).count, seats.count)
+        StudyLevel(
+            id: id,
+            buildingID: buildingId,
+            number: number,
+            zones: (zones ?? [])
+                .map(\.zone)
+                .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+        )
     }
 }
 

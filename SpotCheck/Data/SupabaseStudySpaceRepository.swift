@@ -3,8 +3,8 @@ import Supabase
 
 /// Reads study spaces and writes check-ins through Supabase.
 ///
-/// Every read asks Postgres for only the check-ins that are active at `moment`, so a seat with
-/// an empty `checkIns` list is a free seat and nothing above this layer has to filter again.
+/// Every read asks Postgres for only the check-ins that are active at `moment`.
+/// Counting the free seats is left to the use cases.
 struct SupabaseStudySpaceRepository: StudySpaceRepository {
     let client: SupabaseClient
 
@@ -22,7 +22,7 @@ struct SupabaseStudySpaceRepository: StudySpaceRepository {
         return rows.map(\.building)
     }
 
-    func levelAvailability(inBuilding buildingID: UUID, at moment: Date) async throws -> [LevelAvailability] {
+    func levels(inBuilding buildingID: UUID, at moment: Date) async throws -> [StudyLevel] {
         let rows: [LevelRow] = try await client
             .from("levels")
             .select("id,building_id,number,zones(id,level_id,name,noise_level,seats(id,zone_id,label,is_by_window,has_computer,has_power_outlet,has_partition,is_shared_table,seat_check_ins(id,seat_id,occupant_id,checked_in_at,expires_at,released_at)))")
@@ -33,15 +33,7 @@ struct SupabaseStudySpaceRepository: StudySpaceRepository {
             .execute()
             .value
 
-        return rows.map { row in
-            let count = row.seatCount
-            return LevelAvailability(
-                level: row.level,
-                free: count.free,
-                total: count.total,
-                lastUpdatedAt: moment
-            )
-        }
+        return rows.map(\.level)
     }
 
     func zones(onLevel levelID: UUID, at moment: Date) async throws -> [StudyZone] {
