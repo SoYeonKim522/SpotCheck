@@ -1,20 +1,25 @@
 import Foundation
 
-/// The one file the app and the widget share.
+/// Writes the snapshot the widget reads. The use cases depend on this protocol, so a test can
+/// check what was written without touching the App Group container.
+protocol AvailabilitySnapshotWriting {
+    func write(levels: [AvailabilitySnapshot.LevelCount], inBuilding buildingName: String, readAt: Date)
+    func write(hold: AvailabilitySnapshot.HeldSeat?)
+}
+
+/// The snapshot file the app and the widget share.
 ///
-/// The two halves are written at different moments. Reading a building updates the counts;
-/// checking in, extending or releasing updates the hold. Each write keeps the other half, so
-/// a check-in does not wipe the counts and a refresh does not wipe the seat she is holding.
+/// It holds the seat counts and the held seat. A write to one keeps the other, so checking in
+/// does not wipe the counts and a refresh does not wipe the held seat.
 ///
-/// Nobody can act on a failure here, so a failed write is not an error anyone is shown. The
-/// widget keeps the previous snapshot, which is the behaviour it is built for anyway.
-enum AvailabilitySnapshotStore {
-    static func read() -> AvailabilitySnapshot? {
+/// A failed write keeps the old file, so the widget still shows the last snapshot that worked.
+struct AvailabilitySnapshotStore: AvailabilitySnapshotWriting {
+    func read() -> AvailabilitySnapshot? {
         guard let fileURL, let data = try? Data(contentsOf: fileURL) else { return nil }
         return try? JSONDecoder().decode(AvailabilitySnapshot.self, from: data)
     }
 
-    static func write(levels: [AvailabilitySnapshot.LevelCount], inBuilding buildingName: String, readAt: Date) {
+    func write(levels: [AvailabilitySnapshot.LevelCount], inBuilding buildingName: String, readAt: Date) {
         write(
             AvailabilitySnapshot(
                 buildingName: buildingName,
@@ -25,7 +30,7 @@ enum AvailabilitySnapshotStore {
         )
     }
 
-    static func write(hold: AvailabilitySnapshot.HeldSeat?) {
+    func write(hold: AvailabilitySnapshot.HeldSeat?) {
         let previous = read()
         write(
             AvailabilitySnapshot(
@@ -37,7 +42,7 @@ enum AvailabilitySnapshotStore {
         )
     }
 
-    private static func write(_ snapshot: AvailabilitySnapshot) {
+    private func write(_ snapshot: AvailabilitySnapshot) {
         guard let fileURL else {
             assertionFailure("The App Group container is missing. Check the entitlement on every target.")
             return
@@ -49,7 +54,7 @@ enum AvailabilitySnapshotStore {
         }
     }
 
-    private static var fileURL: URL? {
+    private var fileURL: URL? {
         AppGroup.containerURL?.appending(path: "availability.json")
     }
 }
