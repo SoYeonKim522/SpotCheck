@@ -1,56 +1,45 @@
 import SwiftUI
 
 struct RootView: View {
-    @State private var session = AuthSession(repository: SupabaseAuthenticationRepository())
+    @State private var session: AuthSession
+    @State private var levelList: LevelListViewModel
     @State private var hasRestored = false
+
+    init() {
+        let repository = SupabaseStudySpaceRepository()
+        _session = State(initialValue: AuthSession(repository: SupabaseAuthenticationRepository()))
+        _levelList = State(
+            initialValue: LevelListViewModel(
+                repository: repository,
+                viewLevelAvailability: ViewLevelAvailabilityUseCase(
+                    repository: repository,
+                    widget: WidgetCenterRefresher(),
+                    snapshot: AvailabilitySnapshotStore()
+                ),
+                settings: AppSettingsStore()
+            )
+        )
+    }
 
     var body: some View {
         Group {
             if !hasRestored {
                 ProgressView()
             } else if session.isSignedIn {
-                FindASeatPlaceholder()
+                TabView {
+                    Tab("Find a seat", systemImage: "building.2") {
+                        LevelListView()
+                    }
+                }
             } else {
                 SignInView()
             }
         }
         .environment(session)
+        .environment(levelList)
         .task {
             await session.restore()
             hasRestored = true
-        }
-    }
-}
-
-private struct FindASeatPlaceholder: View {
-    @Environment(AuthSession.self) private var session
-
-    @State private var counts: SupabaseSpike.Counts?
-    @State private var failure: String?
-
-    var body: some View {
-        VStack(spacing: 12) {
-            if let counts {
-                Text(counts.signedInAs)
-                Text("\(counts.seats) seats")
-                Text("\(counts.activeCheckIns) held right now")
-            } else if let failure {
-                Text(failure)
-                    .textSelection(.enabled)
-            } else {
-                ProgressView()
-            }
-
-            Button("Sign out") {
-                Task { await session.signOut() }
-            }
-        }
-        .task {
-            do {
-                counts = try await SupabaseSpike.readCounts()
-            } catch {
-                failure = error.localizedDescription
-            }
         }
     }
 }
