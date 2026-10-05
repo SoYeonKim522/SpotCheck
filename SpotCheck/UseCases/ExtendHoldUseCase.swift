@@ -42,6 +42,8 @@ struct ExtendHoldUseCase {
             seatLabel: extendedHold.seatLabel,
             zoneName: extendedHold.zoneName,
             levelNumber: extendedHold.levelNumber,
+            buildingName: extendedHold.buildingName,
+            checkedInAt: extended.checkedInAt,
             expiresAt: extended.expiresAt
         ))
         widget.reloadAll()

@@ -16,10 +16,21 @@ struct AvailabilitySnapshot: Codable, Hashable {
     let readAt: Date
 
     /// How long a level's seat count is considered fresh enough to show as current.
-    static let freshnessWindow: TimeInterval = 15 * 60
+    static var freshnessWindow: TimeInterval { SeatHoldPolicy.scaled(15 * 60) }
 
     func isRecent(at moment: Date) -> Bool {
         moment.timeIntervalSince(readAt) < Self.freshnessWindow
+    }
+
+    /// The moments from `now` on when what the widget shows changes without the app running: the
+    /// counts turning stale, the reminder, and the hold ending.
+    func displayChanges(from now: Date) -> [Date] {
+        var moments = [readAt.addingTimeInterval(Self.freshnessWindow)]
+        if let hold {
+            moments.append(hold.expiresAt.addingTimeInterval(-SeatHoldPolicy.reminderLead))
+            moments.append(hold.expiresAt)
+        }
+        return moments.filter { $0 > now }.sorted()
     }
 
     /// The level worth walking to, for the sizes that only fit one.
@@ -42,6 +53,8 @@ struct AvailabilitySnapshot: Codable, Hashable {
         let seatLabel: String
         let zoneName: String
         let levelNumber: Int
+        let buildingName: String
+        let checkedInAt: Date
         let expiresAt: Date
     }
 }

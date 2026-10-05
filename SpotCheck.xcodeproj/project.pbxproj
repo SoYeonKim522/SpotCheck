@@ -85,9 +85,11 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Models/LevelFullness.swift,
+				Models/SeatHoldPolicy.swift,
 				Shared/AppGroup.swift,
 				Shared/AvailabilitySnapshot.swift,
 				Shared/AvailabilitySnapshotStore.swift,
+				Shared/Palette.swift,
 				Support/AppSettingsStore.swift,
 			);
 			target = 17269999306BC6D9004EB7B0 /* SpotCheckWidget */;

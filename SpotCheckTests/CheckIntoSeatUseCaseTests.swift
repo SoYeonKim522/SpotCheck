@@ -109,6 +109,8 @@ struct CheckIntoSeatUseCaseTests {
             seatLabel: "5R4",
             zoneName: "Reading Room",
             levelNumber: 5,
+            buildingName: "Building 2",
+            checkedInAt: TestData.now,
             expiresAt: TestData.now.addingTimeInterval(60 * 60)
         )
         #expect(snapshot.writtenHolds == [expected])

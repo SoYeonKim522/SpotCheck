@@ -6,8 +6,18 @@ import Foundation
 /// Each extension adds another `duration`, but a single check-in cannot last longer
 /// than `maximumDuration` from the time it was made.
 enum SeatHoldPolicy {
-    static let duration: TimeInterval = 60 * 60
-    static let maximumDuration: TimeInterval = 3 * 60 * 60
+    static var duration: TimeInterval { scaled(60 * 60) }
+    static var maximumDuration: TimeInterval { scaled(3 * 60 * 60) }
+    static var reminderLead: TimeInterval { scaled(10 * 60) }
+
+    static func scaled(_ interval: TimeInterval) -> TimeInterval {
+        #if DEBUG
+        if let divisor = AppSettingsStore().debugTimeDivisor {
+            return interval / divisor
+        }
+        #endif
+        return interval
+    }
 
     static func latestExpiry(for checkedInAt: Date) -> Date {
         checkedInAt.addingTimeInterval(maximumDuration)
