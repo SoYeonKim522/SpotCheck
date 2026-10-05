@@ -42,6 +42,11 @@ struct AvailabilitySnapshotStore: AvailabilitySnapshotWriting {
         )
     }
 
+    func clear() {
+        guard let fileURL else { return }
+        try? FileManager.default.removeItem(at: fileURL)
+    }
+
     private func write(_ snapshot: AvailabilitySnapshot) {
         guard let fileURL else {
             assertionFailure("The App Group container is missing. Check the entitlement on every target.")

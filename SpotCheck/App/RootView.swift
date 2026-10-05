@@ -18,6 +18,9 @@ struct RootView: View {
 
     private let repository: SupabaseStudySpaceRepository
     private let checkIntoSeat: CheckIntoSeatUseCase
+    private let widget: WidgetCenterRefresher
+    private let snapshot: AvailabilitySnapshotStore
+    private let settings: AppSettingsStore
 
     init() {
         let repository = SupabaseStudySpaceRepository()
@@ -27,6 +30,9 @@ struct RootView: View {
         let session = AuthSession(repository: SupabaseAuthenticationRepository())
 
         self.repository = repository
+        self.widget = widget
+        self.snapshot = snapshot
+        settings = AppSettingsStore()
         checkIntoSeat = CheckIntoSeatUseCase(
             repository: repository,
             reminders: reminders,
@@ -85,14 +91,24 @@ struct RootView: View {
         .task {
             await session.restore()
             hasRestored = true
+            updateWidget()
         }
         .onChange(of: session.isSignedIn) {
+            updateWidget()
             if !session.isSignedIn {
                 myCheckIn.reset()
                 history.reset()
                 selectedTab = .findASeat
             }
         }
+    }
+
+    private func updateWidget() {
+        settings.isSignedIn = session.isSignedIn
+        if !session.isSignedIn {
+            snapshot.clear()
+        }
+        widget.reloadAll()
     }
 
     private var signedIn: some View {

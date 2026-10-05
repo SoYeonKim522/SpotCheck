@@ -22,6 +22,7 @@ struct Provider: TimelineProvider {
     }
 
     private func readText() -> String {
+        guard AppSettingsStore().isSignedIn else { return "Sign in to SpotCheck to see seats." }
         guard let url = AppGroup.containerURL?.appending(path: "spike.txt"),
               let text = try? String(contentsOf: url, encoding: .utf8) else {
             return "Nothing written yet"

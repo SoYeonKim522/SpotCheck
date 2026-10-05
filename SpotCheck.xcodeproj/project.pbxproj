@@ -88,6 +88,7 @@
 				Shared/AppGroup.swift,
 				Shared/AvailabilitySnapshot.swift,
 				Shared/AvailabilitySnapshotStore.swift,
+				Support/AppSettingsStore.swift,
 			);
 			target = 17269999306BC6D9004EB7B0 /* SpotCheckWidget */;
 		};
