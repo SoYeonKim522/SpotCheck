@@ -37,6 +37,13 @@ final class MockStudySpaceRepository: StudySpaceRepository {
         }
     }
 
+    func history(for occupant: OccupantIdentifier, at moment: Date) async throws -> [SeatHold] {
+        try throwReadError()
+        return seatHolds
+            .filter { $0.checkIn.checkedInBy == occupant && !$0.checkIn.isActive(at: moment) }
+            .sorted { $0.checkIn.checkedInAt > $1.checkIn.checkedInAt }
+    }
+
     func activeCheckIn(onSeat seatID: UUID, at moment: Date) async throws -> SeatCheckIn? {
         try throwReadError()
         return seatHolds.map(\.checkIn).first {

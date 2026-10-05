@@ -64,6 +64,19 @@ struct SupabaseStudySpaceRepository: StudySpaceRepository {
         return rows.first?.hold
     }
 
+    func history(for occupant: OccupantIdentifier, at moment: Date) async throws -> [SeatHold] {
+        let rows: [HoldRow] = try await client
+            .from("seat_check_ins")
+            .select("id,seat_id,occupant_id,checked_in_at,expires_at,released_at,seats!inner(label,zones!inner(name,levels!inner(number,buildings!inner(name))))")
+            .eq("occupant_id", value: occupant.value)
+            .or("released_at.not.is.null,expires_at.lte.\(moment.formatted(.iso8601))")
+            .order("checked_in_at", ascending: false)
+            .limit(50)
+            .execute()
+            .value
+        return rows.map(\.hold)
+    }
+
     func activeCheckIn(onSeat seatID: UUID, at moment: Date) async throws -> SeatCheckIn? {
         let rows: [CheckInRow] = try await client
             .from("seat_check_ins")
