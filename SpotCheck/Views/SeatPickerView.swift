@@ -47,8 +47,18 @@ struct SeatPickerView: View {
                 }
             }
         }
+        .sheet(item: seatDetail) { seat in
+            SeatDetailSheet(
+                seat: seat,
+                zoneName: viewModel.zoneName(of: seat),
+                levelNumber: viewModel.level.number,
+                message: viewModel.checkInMessage,
+                isCheckingIn: viewModel.isCheckingIn,
+                checkIn: { Task { await viewModel.checkIn(to: seat, now: .now) } }
+            )
+            .presentationDetents([.medium])
+        }
         .task { await viewModel.refresh(now: .now) }
-        .onChange(of: activeFilters) { releaseFilteredSelection() }
     }
 
     private var seats: some View {
@@ -98,12 +108,8 @@ struct SeatPickerView: View {
         .refreshable { await viewModel.refresh(now: .now) }
     }
 
-    private var activeFilters: [Bool] {
-        [requiresPowerOutlet, requiresComputer, requiresPartition, requiresWindow, requiresSharedTable]
-    }
-
     private var isFiltering: Bool {
-        activeFilters.contains(true)
+        [requiresPowerOutlet, requiresComputer, requiresPartition, requiresWindow, requiresSharedTable].contains(true)
     }
 
     private func state(of seat: StudySeat) -> SeatChipState {
@@ -126,10 +132,11 @@ struct SeatPickerView: View {
             && (!requiresSharedTable || seat.isSharedTable)
     }
 
-    private func releaseFilteredSelection() {
-        if let selectedSeat = viewModel.selectedSeat, !matchesFilters(selectedSeat) {
-            viewModel.deselect()
-        }
+    private var seatDetail: Binding<StudySeat?> {
+        Binding(
+            get: { viewModel.selectedSeat },
+            set: { if $0 == nil { viewModel.deselect() } }
+        )
     }
 
     private var summary: some View {
@@ -250,5 +257,66 @@ private struct SeatChip: View {
             }
             .accessibilityLabel("Seat \(seat.label), \(accessibilityName)")
             .accessibilityAddTraits(isSelected ? [.isSelected] : [])
+    }
+}
+
+private struct SeatDetailSheet: View {
+    let seat: StudySeat
+    let zoneName: String
+    let levelNumber: Int
+    let message: String?
+    let isCheckingIn: Bool
+    let checkIn: () -> Void
+
+    private var features: [String] {
+        var names: [String] = []
+        if seat.isByWindow { names.append("By a window") }
+        if seat.hasComputer { names.append("Computer") }
+        if seat.hasPowerOutlet { names.append("Power outlet") }
+        if seat.hasPartition { names.append("Partition") }
+        if seat.isSharedTable { names.append("Shared table") }
+        return names
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(seat.label)
+                    .font(.largeTitle.bold())
+                Text("\(zoneName) · Level \(levelNumber)")
+                    .foregroundStyle(.secondary)
+            }
+
+            if !features.isEmpty {
+                Text(features.joined(separator: " · "))
+                    .font(.subheadline)
+            }
+
+            Text("Your seat will be held for \(SeatHoldPolicy.durationText), then released automatically.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+
+            if let message {
+                Text(message)
+                    .font(.subheadline)
+                    .foregroundStyle(.red)
+            }
+
+            Button(action: checkIn) {
+                if isCheckingIn {
+                    ProgressView()
+                        .frame(maxWidth: .infinity)
+                } else {
+                    Text("Check in to \(seat.label)")
+                        .frame(maxWidth: .infinity)
+                }
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
+            .disabled(isCheckingIn)
+        }
+        .fixedSize(horizontal: false, vertical: true)
+        .padding(24)
+        .padding(.bottom, 16)
     }
 }

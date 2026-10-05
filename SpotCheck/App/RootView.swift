@@ -6,18 +6,27 @@ struct RootView: View {
     @State private var hasRestored = false
 
     private let repository: SupabaseStudySpaceRepository
+    private let checkIntoSeat: CheckIntoSeatUseCase
 
     init() {
         let repository = SupabaseStudySpaceRepository()
         self.repository = repository
+        let widget = WidgetCenterRefresher()
+        let snapshot = AvailabilitySnapshotStore()
+        checkIntoSeat = CheckIntoSeatUseCase(
+            repository: repository,
+            reminders: NoOpReminderScheduler(),
+            widget: widget,
+            snapshot: snapshot
+        )
         _session = State(initialValue: AuthSession(repository: SupabaseAuthenticationRepository()))
         _levelList = State(
             initialValue: LevelListViewModel(
                 repository: repository,
                 viewLevelAvailability: ViewLevelAvailabilityUseCase(
                     repository: repository,
-                    widget: WidgetCenterRefresher(),
-                    snapshot: AvailabilitySnapshotStore()
+                    widget: widget,
+                    snapshot: snapshot
                 ),
                 settings: AppSettingsStore()
             )
@@ -32,7 +41,12 @@ struct RootView: View {
                 TabView {
                     Tab("Find a seat", systemImage: "building.2") {
                         LevelListView { availability in
-                            SeatPickerViewModel(availability: availability, repository: repository, session: session)
+                            SeatPickerViewModel(
+                                availability: availability,
+                                repository: repository,
+                                checkIntoSeat: checkIntoSeat,
+                                session: session
+                            )
                         }
                     }
                 }

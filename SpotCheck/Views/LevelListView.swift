@@ -14,6 +14,7 @@ struct LevelListView: View {
                 }
                 content
             }
+            .task { await viewModel.refresh(now: .now) }
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(for: LevelAvailability.self) { availability in
                 SeatPickerView(viewModel: makeSeatPickerViewModel(availability))
@@ -33,7 +34,6 @@ struct LevelListView: View {
                 }
             }
         }
-        .task { await viewModel.refresh(now: .now) }
     }
 
     private var buildingHeader: some View {
