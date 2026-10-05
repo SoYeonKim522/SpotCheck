@@ -26,7 +26,7 @@ final class LevelListViewModel {
     init(
         repository: any StudySpaceRepository,
         viewLevelAvailability: ViewLevelAvailabilityUseCase,
-        settings: AppSettingsStore = AppSettingsStore()
+        settings: AppSettingsStore
     ) {
         self.repository = repository
         self.viewLevelAvailability = viewLevelAvailability

@@ -4,6 +4,8 @@ struct LevelListView: View {
     @Environment(AuthSession.self) private var session
     @Environment(LevelListViewModel.self) private var viewModel
 
+    let makeSeatPickerViewModel: (LevelAvailability) -> SeatPickerViewModel
+
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 0) {
@@ -13,6 +15,9 @@ struct LevelListView: View {
                 content
             }
             .navigationBarTitleDisplayMode(.inline)
+            .navigationDestination(for: LevelAvailability.self) { availability in
+                SeatPickerView(viewModel: makeSeatPickerViewModel(availability))
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Sign out") {
@@ -93,7 +98,9 @@ struct LevelListView: View {
         List {
             Section {
                 ForEach(viewModel.availabilities) { availability in
-                    LevelAvailabilityRow(availability: availability)
+                    NavigationLink(value: availability) {
+                        LevelAvailabilityRow(availability: availability)
+                    }
                 }
             } footer: {
                 if let lastUpdatedAt = viewModel.lastUpdatedAt {
