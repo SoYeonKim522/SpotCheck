@@ -3,6 +3,9 @@ import SwiftUI
 struct LevelListView: View {
     @Environment(AuthSession.self) private var session
     @Environment(LevelListViewModel.self) private var viewModel
+    @Environment(MyCheckInViewModel.self) private var myCheckIn
+
+    @State private var isConfirmingSignOut = false
 
     let makeSeatPickerViewModel: (LevelAvailability) -> SeatPickerViewModel
 
@@ -16,13 +19,28 @@ struct LevelListView: View {
             }
             .task { await viewModel.refresh(now: .now) }
             .navigationBarTitleDisplayMode(.inline)
+            .alert(
+                "Sign out while holding \(myCheckIn.hold?.seatLabel ?? "a seat")?",
+                isPresented: $isConfirmingSignOut
+            ) {
+                Button("Sign out", role: .destructive) {
+                    Task { await session.signOut() }
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Others can't use it until your hold ends. You can release it first on the My check-in tab.")
+            }
             .navigationDestination(for: LevelAvailability.self) { availability in
                 SeatPickerView(viewModel: makeSeatPickerViewModel(availability))
             }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Sign out") {
-                        Task { await session.signOut() }
+                        if myCheckIn.hold == nil {
+                            Task { await session.signOut() }
+                        } else {
+                            isConfirmingSignOut = true
+                        }
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
