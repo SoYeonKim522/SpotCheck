@@ -94,6 +94,13 @@
 			);
 			target = 17269999306BC6D9004EB7B0 /* SpotCheckWidget */;
 		};
+		172699D5306C0000004EB7B0 /* Exceptions for "SpotCheck" folder in "SpotCheckNotificationContent" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Shared/ReminderNotification.swift,
+			);
+			target = 172699B3306BC707004EB7B0 /* SpotCheckNotificationContent */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -117,6 +124,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				172699CE306BCF17004EB7B0 /* Exceptions for "SpotCheck" folder in "SpotCheckWidget" target */,
+				172699D5306C0000004EB7B0 /* Exceptions for "SpotCheck" folder in "SpotCheckNotificationContent" target */,
 			);
 			path = SpotCheck;
 			sourceTree = "<group>";
