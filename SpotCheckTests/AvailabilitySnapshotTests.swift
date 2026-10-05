@@ -8,7 +8,14 @@ struct AvailabilitySnapshotTests {
             buildingName: "Building 2",
             levels: [],
             hold: expiresAt.map {
-                AvailabilitySnapshot.HeldSeat(seatLabel: "6L3", zoneName: "Library", levelNumber: 6, expiresAt: $0)
+                AvailabilitySnapshot.HeldSeat(
+                    seatLabel: "6L3",
+                    zoneName: "Library",
+                    levelNumber: 6,
+                    buildingName: "Building 2",
+                    checkedInAt: readAt,
+                    expiresAt: $0
+                )
             },
             readAt: readAt
         )

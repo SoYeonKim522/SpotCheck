@@ -114,11 +114,10 @@ private struct SmallWidgetView: View {
                 .font(.caption)
                 .lineLimit(1)
             Spacer(minLength: 0)
-            Text(timerInterval: entry.date...hold.expiresAt, showsHours: true)
-                .font(.title3.weight(.medium))
-                .monospacedDigit()
-            Text("left")
-                .font(.caption)
+            Text("\(Text(timerInterval: entry.date...hold.expiresAt, showsHours: true).font(.title2.weight(.medium)).monospacedDigit()) \(Text("left").font(.caption))")
+                .lineLimit(1)
+            HoldProgress(hold: hold)
+                .padding(.top, 4)
         }
         .foregroundStyle(Color.holdGreenText)
     }
@@ -138,6 +137,19 @@ private struct SmallWidgetView: View {
                 .monospacedDigit()
             UpdatedLabel(readAt: snapshot.readAt)
         }
+    }
+}
+
+struct HoldProgress: View {
+    let hold: AvailabilitySnapshot.HeldSeat
+
+    var body: some View {
+        ProgressView(timerInterval: hold.checkedInAt...hold.expiresAt, countsDown: true) {
+            EmptyView()
+        } currentValueLabel: {
+            EmptyView()
+        }
+        .tint(Color.holdGreenText)
     }
 }
 

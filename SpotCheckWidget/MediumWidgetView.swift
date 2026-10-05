@@ -36,17 +36,31 @@ struct MediumWidgetView: View {
                     .minimumScaleFactor(0.6)
                     .lineLimit(1)
                 Text("Level \(hold.levelNumber) · \(hold.zoneName)")
+                    .font(.subheadline.weight(.medium))
+                    .lineLimit(1)
+                Text("\(hold.buildingName) · until \(hold.expiresAt.formatted(date: .omitted, time: .shortened))")
                     .font(.subheadline)
                     .lineLimit(1)
+                    .minimumScaleFactor(0.8)
             }
             Spacer()
-            VStack(alignment: .trailing, spacing: 2) {
-                Text(timerInterval: entry.date...hold.expiresAt, showsHours: true)
-                    .font(.title.weight(.medium))
-                    .monospacedDigit()
-                Text("left")
-                    .font(.subheadline)
+            ProgressView(timerInterval: hold.checkedInAt...hold.expiresAt, countsDown: true) {
+                EmptyView()
+            } currentValueLabel: {
+                VStack(spacing: 0) {
+                    Text(timerInterval: entry.date...hold.expiresAt, showsHours: true)
+                        .font(.title2.weight(.medium))
+                        .monospacedDigit()
+                        .multilineTextAlignment(.center)
+                        .minimumScaleFactor(0.6)
+                        .lineLimit(1)
+                    Text("left")
+                        .font(.caption)
+                }
             }
+            .progressViewStyle(.circular)
+            .tint(Color.holdGreenText)
+            .frame(width: 104, height: 104)
         }
         .foregroundStyle(Color.holdGreenText)
     }

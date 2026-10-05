@@ -40,6 +40,8 @@ struct CheckIntoSeatUseCase {
             seatLabel: hold.seatLabel,
             zoneName: hold.zoneName,
             levelNumber: hold.levelNumber,
+            buildingName: hold.buildingName,
+            checkedInAt: hold.checkIn.checkedInAt,
             expiresAt: hold.checkIn.expiresAt
         ))
         widget.reloadAll()

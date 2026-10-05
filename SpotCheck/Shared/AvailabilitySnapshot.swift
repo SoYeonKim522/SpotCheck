@@ -53,6 +53,8 @@ struct AvailabilitySnapshot: Codable, Hashable {
         let seatLabel: String
         let zoneName: String
         let levelNumber: Int
+        let buildingName: String
+        let checkedInAt: Date
         let expiresAt: Date
     }
 }
