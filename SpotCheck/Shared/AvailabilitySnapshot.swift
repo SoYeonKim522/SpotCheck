@@ -22,6 +22,17 @@ struct AvailabilitySnapshot: Codable, Hashable {
         moment.timeIntervalSince(readAt) < Self.freshnessWindow
     }
 
+    /// The moments from `now` on when what the widget shows changes without the app running: the
+    /// counts turning stale, the reminder, and the hold ending.
+    func displayChanges(from now: Date) -> [Date] {
+        var moments = [readAt.addingTimeInterval(Self.freshnessWindow)]
+        if let hold {
+            moments.append(hold.expiresAt.addingTimeInterval(-SeatHoldPolicy.reminderLead))
+            moments.append(hold.expiresAt)
+        }
+        return moments.filter { $0 > now }.sorted()
+    }
+
     /// The level worth walking to, for the sizes that only fit one.
     var emptiestLevel: LevelCount? {
         levels.max { $0.free < $1.free }

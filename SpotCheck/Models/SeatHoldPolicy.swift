@@ -8,6 +8,7 @@ import Foundation
 enum SeatHoldPolicy {
     static let duration: TimeInterval = 60 * 60
     static let maximumDuration: TimeInterval = 3 * 60 * 60
+    static let reminderLead: TimeInterval = 10 * 60
 
     static func latestExpiry(for checkedInAt: Date) -> Date {
         checkedInAt.addingTimeInterval(maximumDuration)
