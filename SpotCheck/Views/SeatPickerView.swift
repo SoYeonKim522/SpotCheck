@@ -56,7 +56,6 @@ struct SeatPickerView: View {
                 isCheckingIn: viewModel.isCheckingIn,
                 checkIn: { Task { await viewModel.checkIn(to: seat, now: .now) } }
             )
-            .presentationDetents([.medium])
         }
         .task { await viewModel.refresh(now: .now) }
     }
@@ -268,32 +267,60 @@ private struct SeatDetailSheet: View {
     let isCheckingIn: Bool
     let checkIn: () -> Void
 
-    private var features: [String] {
-        var names: [String] = []
-        if seat.isByWindow { names.append("By a window") }
-        if seat.hasComputer { names.append("Computer") }
-        if seat.hasPowerOutlet { names.append("Power outlet") }
-        if seat.hasPartition { names.append("Partition") }
-        if seat.isSharedTable { names.append("Shared table") }
-        return names
+    @Environment(\.dismiss) private var dismiss
+    @State private var height: CGFloat = 320
+
+    private var features: [(name: String, symbol: String)] {
+        var features: [(String, String)] = []
+        if seat.isByWindow { features.append(("By a window", "window.casement")) }
+        if seat.hasComputer { features.append(("Computer", "desktopcomputer")) }
+        if seat.hasPowerOutlet { features.append(("Power outlet", "powerplug")) }
+        if seat.hasPartition { features.append(("Partition", "rectangle.split.2x1")) }
+        if seat.isSharedTable { features.append(("Shared table", "person.2")) }
+        return features
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(seat.label)
-                    .font(.largeTitle.bold())
-                Text("\(zoneName) · Level \(levelNumber)")
-                    .foregroundStyle(.secondary)
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(seat.label)
+                        .font(.largeTitle.bold())
+                    Text("\(zoneName) · Level \(levelNumber)")
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 44, height: 44)
+                        .background(.quaternary, in: .circle)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Close")
             }
 
             if !features.isEmpty {
-                Text(features.joined(separator: " · "))
-                    .font(.subheadline)
+                ScrollView(.horizontal) {
+                    HStack(spacing: 8) {
+                        ForEach(features, id: \.name) { feature in
+                            Label(feature.name, systemImage: feature.symbol)
+                                .font(.subheadline.weight(.medium))
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 10)
+                                .overlay { Capsule().stroke(.primary, lineWidth: 2) }
+                        }
+                    }
+                    .padding(2)
+                }
+                .scrollIndicators(.hidden)
             }
 
             Text("Your seat will be held for \(SeatHoldPolicy.durationText), then released automatically.")
-                .font(.footnote)
+                .font(.subheadline)
                 .foregroundStyle(.secondary)
 
             if let message {
@@ -303,20 +330,27 @@ private struct SeatDetailSheet: View {
             }
 
             Button(action: checkIn) {
-                if isCheckingIn {
-                    ProgressView()
-                        .frame(maxWidth: .infinity)
-                } else {
-                    Text("Check in to \(seat.label)")
-                        .frame(maxWidth: .infinity)
+                Group {
+                    if isCheckingIn {
+                        ProgressView()
+                    } else {
+                        Text("Check in to \(seat.label)")
+                            .font(.headline)
+                    }
                 }
+                .frame(maxWidth: .infinity, minHeight: 60)
+                .background(.green.opacity(0.5), in: .capsule)
+                .overlay { Capsule().stroke(.primary, lineWidth: 2) }
+                .contentShape(.capsule)
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
+            .buttonStyle(.plain)
             .disabled(isCheckingIn)
         }
         .fixedSize(horizontal: false, vertical: true)
-        .padding(24)
-        .padding(.bottom, 16)
+        .padding([.horizontal, .top], 24)
+        .onGeometryChange(for: CGFloat.self) { $0.size.height + $0.safeAreaInsets.bottom } action: {
+            height = $0
+        }
+        .presentationDetents([.height(height)])
     }
 }
