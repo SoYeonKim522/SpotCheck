@@ -196,21 +196,21 @@ struct SeatPickerView: View {
 
     private var legend: some View {
         HStack(spacing: 12) {
-            legendKey(.green, "free")
-            legendKey(.red, "taken")
-            legendKey(.green, "your pick", isSelected: true)
+            legendKey(.free, "free")
+            legendKey(.taken, "taken")
+            legendKey(.free, "your pick", isSelected: true)
             if isFiltering {
-                legendKey(.gray.opacity(0.4), "filtered out")
+                legendKey(.filteredOut, "filtered out")
             }
         }
         .font(.caption)
     }
 
-    private func legendKey(_ colour: Color, _ label: String, isSelected: Bool = false) -> some View {
+    private func legendKey(_ state: SeatChipState, _ label: String, isSelected: Bool = false) -> some View {
         HStack(spacing: 6) {
             Circle()
-                .fill(colour.opacity(0.5))
-                .overlay { Circle().stroke(colour, lineWidth: 1.5) }
+                .fill(state.fill)
+                .overlay { Circle().stroke(state.edge, lineWidth: 1.5) }
                 .overlay { Circle().stroke(Color.accentColor, lineWidth: isSelected ? 3 : 0) }
                 .frame(width: 18, height: 18)
             Text(label)
@@ -229,24 +229,25 @@ private extension Color {
     })
 }
 
-private extension View {
-    func card() -> some View {
-        background(.background, in: .rect(cornerRadius: 24))
-            .overlay { RoundedRectangle(cornerRadius: 24).stroke(.primary, lineWidth: 2) }
-    }
-}
-
 private enum SeatChipState {
     case free
     case taken
     case mine
     case filteredOut
 
-    var tint: Color {
+    var fill: Color {
         switch self {
-        case .free, .mine: .green
-        case .taken: .red
-        case .filteredOut: .gray
+        case .free, .mine: .holdGreen
+        case .taken: .nearlyFullRed
+        case .filteredOut: .gray.opacity(0.2)
+        }
+    }
+
+    var edge: Color {
+        switch self {
+        case .free, .mine: .holdGreenEdge
+        case .taken: .nearlyFullRedEdge
+        case .filteredOut: .gray.opacity(0.4)
         }
     }
 
@@ -266,10 +267,6 @@ private struct SeatChip: View {
     let isMine: Bool
     let isSelected: Bool
 
-    private var isMuted: Bool {
-        state == .filteredOut
-    }
-
     private var accessibilityName: String {
         state == .filteredOut && isMine ? "\(state.name), checked in" : state.name
     }
@@ -280,10 +277,10 @@ private struct SeatChip: View {
             .monospacedDigit()
             .foregroundStyle(state == .filteredOut ? .secondary : .primary)
             .frame(maxWidth: .infinity, minHeight: 44)
-            .background(state.tint.opacity(isMuted ? 0.2 : 0.5), in: .rect(cornerRadius: 14))
+            .background(state.fill, in: .rect(cornerRadius: 14))
             .overlay {
                 RoundedRectangle(cornerRadius: 14)
-                    .strokeBorder(state.tint.opacity(isMuted ? 0.4 : 1), lineWidth: 1.5)
+                    .strokeBorder(state.edge, lineWidth: 1.5)
             }
             .overlay {
                 RoundedRectangle(cornerRadius: 14)
@@ -371,10 +368,11 @@ private struct SeatDetailSheet: View {
                     } else {
                         Text("Check in to \(seat.label)")
                             .font(.headline)
+                            .foregroundStyle(Color.holdGreenText)
                     }
                 }
                 .frame(maxWidth: .infinity, minHeight: 60)
-                .background(.green.opacity(0.5), in: .capsule)
+                .background(Color.holdGreen, in: .capsule)
                 .overlay { Capsule().stroke(.primary, lineWidth: 2) }
                 .contentShape(.capsule)
             }

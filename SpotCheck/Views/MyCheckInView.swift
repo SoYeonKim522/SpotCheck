@@ -47,7 +47,7 @@ struct MyCheckInView: View {
             Spacer()
 
             ZStack {
-                HoldRing(fraction: remainingFraction(of: hold.checkIn, at: now), lineWidth: 10)
+                HoldRing(fraction: remainingFraction(of: hold.checkIn, at: now), lineWidth: 12)
                 VStack(spacing: 2) {
                     Text(remainingDurationText(of: hold.checkIn, at: now))
                         .font(.system(size: 40, weight: .medium))
@@ -78,27 +78,34 @@ struct MyCheckInView: View {
             Spacer()
 
             VStack(spacing: 12) {
-                Button {
+                actionButton("Hold for another hour", edge: .holdGreenEdge, fill: .holdGreen, text: .holdGreenText) {
                     Task { await viewModel.extend(now: .now) }
-                } label: {
-                    Text("Hold for another hour")
-                        .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-                .disabled(viewModel.isWorking)
-
-                Button(role: .destructive) {
+                actionButton("Release seat", edge: .releaseRed, fill: .clear, text: .releaseRed) {
                     viewModel.askToRelease()
-                } label: {
-                    Text("Release seat")
-                        .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.bordered)
-                .controlSize(.large)
-                .disabled(viewModel.isWorking)
             }
         }
         .padding(24)
+    }
+
+    private func actionButton(
+        _ title: String,
+        edge: Color,
+        fill: Color,
+        text: Color,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Text(title)
+                .bold()
+                .foregroundStyle(text)
+                .frame(maxWidth: .infinity, minHeight: 60)
+                .background(fill, in: .rect(cornerRadius: 20))
+                .overlay { RoundedRectangle(cornerRadius: 20).stroke(edge, lineWidth: 1.5) }
+                .contentShape(.rect(cornerRadius: 20))
+        }
+        .buttonStyle(.plain)
+        .disabled(viewModel.isWorking)
     }
 }

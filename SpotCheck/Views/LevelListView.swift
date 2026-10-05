@@ -150,17 +150,25 @@ private struct LevelAvailabilityRow: View {
 
     private var status: Color {
         switch availability.fullness {
-        case .plenty: .green
-        case .fillingUp: .yellow
-        case .nearlyFull: .red
+        case .plenty: .holdGreen
+        case .fillingUp: .fillingUpYellow
+        case .nearlyFull: .nearlyFullRed
+        }
+    }
+
+    private var dot: (fill: Color, edge: Color) {
+        switch availability.fullness {
+        case .plenty: (.holdGreen, .holdGreenEdge)
+        case .fillingUp: (.fillingUpYellow, .fillingUpYellowEdge)
+        case .nearlyFull: (.nearlyFullRed, .nearlyFullRedEdge)
         }
     }
 
     var body: some View {
         HStack(spacing: 12) {
             Circle()
-                .fill(status.opacity(0.5))
-                .overlay { Circle().stroke(status, lineWidth: 1.5) }
+                .fill(dot.fill)
+                .overlay { Circle().stroke(dot.edge, lineWidth: 1.5) }
                 .frame(width: 22, height: 22)
 
             Text("L\(availability.level.number)")
@@ -179,7 +187,7 @@ private struct LevelAvailabilityRow: View {
             Text("\(availability.free)/\(availability.total)")
                 .fontWeight(.semibold)
                 .monospacedDigit()
-                .foregroundStyle(availability.fullness == .nearlyFull ? Color.red : .primary)
+                .foregroundStyle(availability.fullness == .nearlyFull ? Color.nearlyFullText : .primary)
                 .layoutPriority(1)
         }
         .padding(.vertical, 18)
