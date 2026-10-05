@@ -8,7 +8,7 @@ struct SeatPickerView: View {
     @State private var requiresWindow = false
     @State private var requiresSharedTable = false
 
-    private let columns = [GridItem(.adaptive(minimum: 60), spacing: 8)]
+    private let columns = [GridItem(.adaptive(minimum: 64), spacing: 10)]
 
     init(viewModel: SeatPickerViewModel) {
         _viewModel = State(initialValue: viewModel)
@@ -61,49 +61,63 @@ struct SeatPickerView: View {
     }
 
     private var seats: some View {
-        List {
-            Section {
-                summary
-                legend
-                filters
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 12) {
+                    summary
+                    Divider()
+                    legend
+                    filters
 
-                if isFiltering && !hasMatchingSeat {
-                    Text("No seat on this level has all of these. Turn a filter off to see more.")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
+                    if isFiltering && !hasMatchingSeat {
+                        Text("No seat on this level has all of these. Turn a filter off to see more.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
                 }
-            } footer: {
+                .padding(16)
+                .card()
+
                 TimelineView(.periodic(from: .now, by: 60)) { _ in
                     Text(LastUpdated.text(viewModel.readAt, at: .now))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, alignment: .trailing)
+                        .padding(.horizontal, 8)
                 }
-            }
 
-            ForEach(viewModel.zones) { zone in
-                Section {
-                    LazyVGrid(columns: columns, spacing: 8) {
-                        ForEach(viewModel.seats(in: zone)) { seat in
-                            let state = state(of: seat)
-                            Button {
-                                viewModel.select(seat)
-                            } label: {
-                                SeatChip(
-                                    seat: seat,
-                                    state: state,
-                                    isMine: viewModel.isHeldByMe(seat),
-                                    isSelected: viewModel.selectedSeat == seat
-                                )
+                ForEach(viewModel.zones) { zone in
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(zoneHeading(zone))
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, 8)
+
+                        LazyVGrid(columns: columns, spacing: 10) {
+                            ForEach(viewModel.seats(in: zone)) { seat in
+                                let state = state(of: seat)
+                                Button {
+                                    viewModel.select(seat)
+                                } label: {
+                                    SeatChip(
+                                        seat: seat,
+                                        state: state,
+                                        isMine: viewModel.isHeldByMe(seat),
+                                        isSelected: viewModel.selectedSeat == seat
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                                .disabled(state != .free)
                             }
-                            .buttonStyle(.plain)
-                            .disabled(state != .free)
                         }
+                        .padding(16)
+                        .card()
                     }
-                    .padding(.vertical, 4)
-                } header: {
-                    Text(zoneHeading(zone))
                 }
             }
+            .padding(16)
         }
+        .background(Color(.systemGroupedBackground))
         .refreshable { await viewModel.refresh(now: .now) }
     }
 
@@ -153,37 +167,40 @@ struct SeatPickerView: View {
                 filterChip("Window", isOn: $requiresWindow)
                 filterChip("Shared table", isOn: $requiresSharedTable)
             }
+            .padding(2)
         }
+        .scrollIndicators(.hidden)
     }
 
-    @ViewBuilder
     private func filterChip(_ title: String, isOn: Binding<Bool>) -> some View {
-        let chip = Toggle(isOn: isOn) {
-            HStack(spacing: 6) {
-                if isOn.wrappedValue {
-                    Image(systemName: "checkmark")
-                        .font(.footnote.weight(.semibold))
-                }
+        Button {
+            isOn.wrappedValue.toggle()
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: isOn.wrappedValue ? "checkmark.circle.fill" : "circle")
+                    .font(.title3)
+                    .foregroundStyle(isOn.wrappedValue ? Color.accentColor : .secondary)
                 Text(title)
+                    .foregroundStyle(isOn.wrappedValue ? Color.selectedText : .primary)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(isOn.wrappedValue ? Color.accentColor.opacity(0.12) : .clear, in: .capsule)
+            .overlay {
+                Capsule().stroke(isOn.wrappedValue ? Color.accentColor : .secondary.opacity(0.4), lineWidth: 2)
             }
         }
-        .toggleStyle(.button)
-        .buttonBorderShape(.capsule)
-
-        if isOn.wrappedValue {
-            chip.buttonStyle(.borderedProminent)
-        } else {
-            chip.buttonStyle(.bordered)
-        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(isOn.wrappedValue ? [.isToggle, .isSelected] : .isToggle)
     }
 
     private var legend: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: 12) {
             legendKey(.green, "free")
             legendKey(.red, "taken")
             legendKey(.green, "your pick", isSelected: true)
             if isFiltering {
-                legendKey(.gray, "filtered out")
+                legendKey(.gray.opacity(0.4), "filtered out")
             }
         }
         .font(.caption)
@@ -191,13 +208,11 @@ struct SeatPickerView: View {
 
     private func legendKey(_ colour: Color, _ label: String, isSelected: Bool = false) -> some View {
         HStack(spacing: 6) {
-            RoundedRectangle(cornerRadius: 4)
-                .fill(colour.opacity(0.35))
+            Circle()
+                .fill(colour.opacity(0.5))
+                .overlay { Circle().stroke(colour, lineWidth: 1.5) }
+                .overlay { Circle().stroke(Color.accentColor, lineWidth: isSelected ? 3 : 0) }
                 .frame(width: 18, height: 18)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 4)
-                        .strokeBorder(Color.accentColor, lineWidth: isSelected ? 2 : 0)
-                }
             Text(label)
         }
     }
@@ -205,6 +220,19 @@ struct SeatPickerView: View {
     private func zoneHeading(_ zone: StudyZone) -> String {
         guard let noiseLevel = zone.noiseLevel else { return zone.name }
         return "\(zone.name) · \(noiseLevel.displayName)"
+    }
+}
+
+private extension Color {
+    static let selectedText = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark ? .white : UIColor(red: 0x2D / 255, green: 0x4E / 255, blue: 0x76 / 255, alpha: 1)
+    })
+}
+
+private extension View {
+    func card() -> some View {
+        background(.background, in: .rect(cornerRadius: 24))
+            .overlay { RoundedRectangle(cornerRadius: 24).stroke(.primary, lineWidth: 2) }
     }
 }
 
@@ -238,6 +266,10 @@ private struct SeatChip: View {
     let isMine: Bool
     let isSelected: Bool
 
+    private var isMuted: Bool {
+        state == .filteredOut
+    }
+
     private var accessibilityName: String {
         state == .filteredOut && isMine ? "\(state.name), checked in" : state.name
     }
@@ -248,10 +280,13 @@ private struct SeatChip: View {
             .monospacedDigit()
             .foregroundStyle(state == .filteredOut ? .secondary : .primary)
             .frame(maxWidth: .infinity, minHeight: 44)
-            .background(state.tint.opacity(0.35))
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .background(state.tint.opacity(isMuted ? 0.2 : 0.5), in: .rect(cornerRadius: 14))
             .overlay {
-                RoundedRectangle(cornerRadius: 8)
+                RoundedRectangle(cornerRadius: 14)
+                    .strokeBorder(state.tint.opacity(isMuted ? 0.4 : 1), lineWidth: 1.5)
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: 14)
                     .strokeBorder(Color.accentColor, lineWidth: isSelected || isMine ? 3 : 0)
             }
             .accessibilityLabel("Seat \(seat.label), \(accessibilityName)")

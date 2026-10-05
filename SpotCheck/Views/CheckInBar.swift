@@ -10,7 +10,7 @@ struct HoldRing: View {
                 .stroke(.quaternary, lineWidth: lineWidth)
             Circle()
                 .trim(from: 0, to: fraction)
-                .stroke(.green, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                .stroke(.green.opacity(0.5), style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                 .rotationEffect(.degrees(-90))
         }
     }
