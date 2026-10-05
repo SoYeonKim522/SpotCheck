@@ -18,4 +18,18 @@ struct SeatCheckIn: Identifiable, Hashable {
     func isActive(at moment: Date) -> Bool {
         releasedAt == nil && moment < expiresAt
     }
+
+    /// How long the student was at the seat.
+    ///
+    /// It ends when the student released the seat. If they did not, the app does not know when
+    /// they left, so it counts until the check-in expired.
+    var timeAtSeat: TimeInterval {
+        (releasedAt ?? expiresAt).timeIntervalSince(checkedInAt)
+    }
+
+    /// The time at the seat in whole minutes, rounded to the nearest minute.
+    /// Screens show this value, so a total made from it matches the rows it adds up.
+    var minutesAtSeat: Int {
+        Int((timeAtSeat / 60).rounded())
+    }
 }

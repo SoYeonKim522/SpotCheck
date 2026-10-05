@@ -26,6 +26,10 @@ protocol StudySpaceRepository {
     /// The seat's active check-in at `moment`, whoever holds it.
     func activeCheckIn(onSeat seatID: UUID, at moment: Date) async throws -> SeatCheckIn?
 
+    /// The check-ins this person has finished by `moment`, newest first.
+    /// A check-in is finished when it was released or has expired. Check-ins made by other people are not included.
+    func history(for occupant: OccupantIdentifier, at moment: Date) async throws -> [SeatHold]
+
     func add(_ checkIn: SeatCheckIn) async throws
 
     func update(_ checkIn: SeatCheckIn) async throws
