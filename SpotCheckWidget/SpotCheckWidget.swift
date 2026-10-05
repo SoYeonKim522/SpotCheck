@@ -67,10 +67,10 @@ struct SpotCheckWidgetEntryView: View {
             SmallWidgetView(entry: entry)
         case .systemMedium:
             MediumWidgetView(entry: entry)
+        case .accessoryRectangular:
+            AccessoryRectangularView(entry: entry)
         default:
-            // TODO: accessoryRectangular layout
-            Text(entry.snapshot?.buildingName ?? "No seat held. Open SpotCheck to find one.")
-                .containerBackground(.fill.tertiary, for: .widget)
+            SmallWidgetView(entry: entry)
         }
     }
 }
