@@ -34,8 +34,8 @@ struct StudyHistoryView: View {
                 description: Text("Once a hold ends, you'll see it here.")
             )
         case .loaded:
-            List {
-                Section {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 12) {
                     HStack {
                         Text("Study time this week")
                         Spacer()
@@ -43,14 +43,30 @@ struct StudyHistoryView: View {
                             .font(.headline)
                             .monospacedDigit()
                     }
-                }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 18)
+                    .card(fill: .holdGreen)
 
-                Section("Past check-ins") {
-                    ForEach(viewModel.holds) { hold in
-                        HistoryRow(hold: hold)
+                    Text("Past check-ins")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.sectionGreen)
+                        .padding(.horizontal, 8)
+                        .padding(.top, 8)
+
+                    VStack(spacing: 0) {
+                        ForEach(viewModel.holds) { hold in
+                            HistoryRow(hold: hold)
+                            if hold.id != viewModel.holds.last?.id {
+                                Divider().overlay(Color.dividerGreen)
+                            }
+                        }
                     }
+                    .padding(.horizontal, 20)
+                    .card()
                 }
+                .padding(16)
             }
+            .background(Color(.systemGroupedBackground))
             .refreshable { await viewModel.refresh(now: .now) }
         }
     }
@@ -62,8 +78,16 @@ private struct HistoryRow: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
-                Text("Seat \(hold.seatLabel)")
-                    .fontWeight(.medium)
+                HStack(spacing: 8) {
+                    Text("Seat")
+                        .fontWeight(.medium)
+                    Text(hold.seatLabel)
+                        .fontWeight(.medium)
+                        .foregroundStyle(Color.tagGreenText)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 2)
+                        .background(Color.tagGreenFill, in: .rect(cornerRadius: 8))
+                }
                 Text("\(hold.zoneName) · Level \(hold.levelNumber) · \(hold.buildingName)")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
@@ -73,13 +97,20 @@ private struct HistoryRow: View {
             }
             Spacer()
             Text(timeText(TimeInterval(hold.checkIn.minutesAtSeat * 60)))
+                .fontWeight(.semibold)
                 .monospacedDigit()
+                .foregroundStyle(Color.holdGreenText)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(Color.holdGreen, in: .capsule)
         }
-        .padding(.vertical, 2)
+        .padding(.vertical, 14)
         .accessibilityElement(children: .combine)
     }
 }
 
 private func timeText(_ interval: TimeInterval) -> String {
-    Duration.seconds(interval).formatted(.units(allowed: [.hours, .minutes], width: .abbreviated))
+    Duration.seconds(interval)
+        .formatted(.units(allowed: [.hours, .minutes], width: .abbreviated))
+        .replacing(".", with: "")
 }

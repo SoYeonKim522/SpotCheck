@@ -9,12 +9,16 @@ extension Color {
     static let nearlyFullRed = Color(red: 0xE0 / 255, green: 0x93 / 255, blue: 0x8E / 255)
     static let nearlyFullRedEdge = Color(red: 0xBC / 255, green: 0x7C / 255, blue: 0x77 / 255)
     static let nearlyFullText = Color(red: 0xC0 / 255, green: 0x4A / 255, blue: 0x4A / 255)
+    static let sectionGreen = Color(red: 0x5F / 255, green: 0x89 / 255, blue: 0x53 / 255)
+    static let tagGreenFill = Color(red: 0xF2 / 255, green: 0xF7 / 255, blue: 0xF0 / 255)
+    static let tagGreenText = Color(red: 0x4E / 255, green: 0x7A / 255, blue: 0x42 / 255)
+    static let dividerGreen = Color(red: 0xE9 / 255, green: 0xF1 / 255, blue: 0xE6 / 255)
     static let releaseRed = Color(red: 0xC0 / 255, green: 0x45 / 255, blue: 0x3F / 255)
 }
 
 extension View {
-    func card() -> some View {
-        background(.background, in: .rect(cornerRadius: 24))
+    func card(fill: Color = Color(.systemBackground)) -> some View {
+        background(fill, in: .rect(cornerRadius: 24))
             .overlay { RoundedRectangle(cornerRadius: 24).stroke(.primary, lineWidth: 2) }
     }
 }
