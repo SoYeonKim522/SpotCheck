@@ -9,6 +9,8 @@ import SwiftUI
 
 @main
 struct SpotCheckApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+
     #if DEBUG
     init() {
         let divisor = UserDefaults.standard.double(forKey: "holdTimeDivisor")
