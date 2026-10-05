@@ -18,8 +18,19 @@ struct AppSettingsStore {
         nonmutating set { defaults.set(newValue, forKey: Key.isSignedIn) }
     }
 
+    #if DEBUG
+    var debugTimeDivisor: Double? {
+        get {
+            let divisor = defaults.double(forKey: Key.debugTimeDivisor)
+            return divisor > 0 ? divisor : nil
+        }
+        nonmutating set { defaults.set(newValue, forKey: Key.debugTimeDivisor) }
+    }
+    #endif
+
     private enum Key {
         static let lastBuildingID = "lastBuildingID"
         static let isSignedIn = "isSignedIn"
+        static let debugTimeDivisor = "debugTimeDivisor"
     }
 }

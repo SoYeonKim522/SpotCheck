@@ -16,7 +16,7 @@ struct AvailabilitySnapshot: Codable, Hashable {
     let readAt: Date
 
     /// How long a level's seat count is considered fresh enough to show as current.
-    static let freshnessWindow: TimeInterval = 15 * 60
+    static var freshnessWindow: TimeInterval { SeatHoldPolicy.scaled(15 * 60) }
 
     func isRecent(at moment: Date) -> Bool {
         moment.timeIntervalSince(readAt) < Self.freshnessWindow
