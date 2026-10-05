@@ -74,8 +74,8 @@ struct SeatPickerView: View {
                         .foregroundStyle(.secondary)
                 }
             } footer: {
-                TimelineView(.periodic(from: .now, by: 60)) { context in
-                    Text(LastUpdated.text(viewModel.readAt, at: context.date))
+                TimelineView(.periodic(from: .now, by: 60)) { _ in
+                    Text(LastUpdated.text(viewModel.readAt, at: .now))
                         .frame(maxWidth: .infinity, alignment: .trailing)
                 }
             }

@@ -104,8 +104,8 @@ struct LevelListView: View {
                 }
             } footer: {
                 if let lastUpdatedAt = viewModel.lastUpdatedAt {
-                    TimelineView(.periodic(from: .now, by: 60)) { context in
-                        Text(LastUpdated.text(lastUpdatedAt, at: context.date))
+                    TimelineView(.periodic(from: .now, by: 60)) { _ in
+                        Text(LastUpdated.text(lastUpdatedAt, at: .now))
                     }
                 }
             }

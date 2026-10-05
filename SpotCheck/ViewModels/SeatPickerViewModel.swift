@@ -21,12 +21,14 @@ final class SeatPickerViewModel {
     private let repository: any StudySpaceRepository
     private let checkIntoSeat: CheckIntoSeatUseCase
     private let session: AuthSession
+    private let onCheckIn: (SeatHold) -> Void
 
     init(
         availability: LevelAvailability,
         repository: any StudySpaceRepository,
         checkIntoSeat: CheckIntoSeatUseCase,
-        session: AuthSession
+        session: AuthSession,
+        onCheckIn: @escaping (SeatHold) -> Void
     ) {
         self.level = availability.level
         self.readAt = availability.lastUpdatedAt
@@ -34,6 +36,7 @@ final class SeatPickerViewModel {
         self.repository = repository
         self.checkIntoSeat = checkIntoSeat
         self.session = session
+        self.onCheckIn = onCheckIn
     }
 
     var zones: [StudyZone] {
@@ -86,7 +89,8 @@ final class SeatPickerViewModel {
         defer { isCheckingIn = false }
 
         do {
-            _ = try await checkIntoSeat.execute(seat: seat, occupant: occupant, now: now)
+            let hold = try await checkIntoSeat.execute(seat: seat, occupant: occupant, now: now)
+            onCheckIn(hold)
             selectedSeat = nil
             await refresh(now: now)
         } catch let error as CheckIntoSeatError {

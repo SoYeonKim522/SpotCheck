@@ -8,13 +8,7 @@ import Observation
 @MainActor
 @Observable
 final class LevelListViewModel {
-    enum State {
-        case loading
-        case loaded
-        case couldNotReach
-    }
-
-    private(set) var state = State.loading
+    private(set) var state = LoadState.loading
     private(set) var buildings: [CampusBuilding] = []
     private(set) var selectedBuilding: CampusBuilding?
     private(set) var availabilities: [LevelAvailability] = []

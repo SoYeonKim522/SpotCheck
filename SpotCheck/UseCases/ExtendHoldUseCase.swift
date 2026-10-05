@@ -61,7 +61,7 @@ enum ExtendHoldError: LocalizedError {
         case .holdHasExpired:
             return "Your hold on this seat has ended."
         case .alreadyAtMaximum:
-            return "You've held this seat for the full \(SeatHoldPolicy.maximumDurationText)."
+            return "A seat can't be held for more than \(SeatHoldPolicy.maximumDurationText) at a time."
         }
     }
 
@@ -72,7 +72,7 @@ enum ExtendHoldError: LocalizedError {
         case .holdHasExpired:
             return "Check in again to keep studying here."
         case .alreadyAtMaximum:
-            return "Release it so someone else can use it."
+            return "Release this seat, then check in again if you still need it."
         }
     }
 }
