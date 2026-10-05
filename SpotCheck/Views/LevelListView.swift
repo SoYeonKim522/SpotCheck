@@ -66,18 +66,19 @@ struct LevelListView: View {
                 HStack(spacing: 6) {
                     Text(viewModel.selectedBuilding?.name ?? "SpotCheck")
                         .font(.largeTitle.bold())
-                    Image(systemName: "chevron.down")
-                        .font(.headline)
+                    Image(systemName: "arrowtriangle.down.fill")
+                        .font(.subheadline)
                 }
             }
             .foregroundStyle(.primary)
 
             Text(viewModel.selectedBuilding?.address ?? "")
-                .font(.subheadline)
+                .font(.subheadline.italic())
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 20)
+        .padding(.bottom, 12)
     }
 
     @ViewBuilder
@@ -113,21 +114,33 @@ struct LevelListView: View {
     }
 
     private var levels: some View {
-        List {
-            Section {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
                 ForEach(viewModel.availabilities) { availability in
                     NavigationLink(value: availability) {
                         LevelAvailabilityRow(availability: availability)
+                            .padding(.horizontal, 16)
+                            .background(.background, in: .rect(cornerRadius: 24))
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 24)
+                                    .stroke(.primary, lineWidth: 2)
+                            }
                     }
+                    .buttonStyle(.plain)
                 }
-            } footer: {
+
                 if let lastUpdatedAt = viewModel.lastUpdatedAt {
                     TimelineView(.periodic(from: .now, by: 60)) { _ in
                         Text(LastUpdated.text(lastUpdatedAt, at: .now))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, 8)
                     }
                 }
             }
+            .padding(16)
         }
+        .background(Color(.systemGroupedBackground))
         .refreshable { await viewModel.refresh(now: .now) }
     }
 }
@@ -146,24 +159,31 @@ private struct LevelAvailabilityRow: View {
     var body: some View {
         HStack(spacing: 12) {
             Circle()
-                .fill(status)
-                .frame(width: 14, height: 14)
+                .fill(status.opacity(0.5))
+                .overlay { Circle().stroke(status, lineWidth: 1.5) }
+                .frame(width: 22, height: 22)
 
             Text("L\(availability.level.number)")
                 .fontWeight(.medium)
+                .frame(width: 32, alignment: .leading)
 
-            ProgressView(
-                value: Double(availability.total - availability.free),
-                total: Double(max(availability.total, 1))
-            )
+            Gauge(
+                value: Double(availability.free),
+                in: 0...Double(max(availability.total, 1))
+            ) {
+                EmptyView()
+            }
+            .gaugeStyle(.accessoryLinearCapacity)
             .tint(status)
 
             Text("\(availability.free)/\(availability.total)")
+                .fontWeight(.semibold)
                 .monospacedDigit()
                 .foregroundStyle(availability.fullness == .nearlyFull ? Color.red : .primary)
                 .layoutPriority(1)
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 18)
+        .contentShape(.rect)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Level \(availability.level.number), \(availability.free) of \(availability.total) seats free")
     }
