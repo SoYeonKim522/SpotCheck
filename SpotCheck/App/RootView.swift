@@ -26,7 +26,7 @@ struct RootView: View {
         let repository = SupabaseStudySpaceRepository()
         let widget = WidgetCenterRefresher()
         let snapshot = AvailabilitySnapshotStore()
-        let reminders = NoOpReminderScheduler()
+        let reminders = UserNotificationReminderScheduler()
         let session = AuthSession(repository: SupabaseAuthenticationRepository())
 
         self.repository = repository
