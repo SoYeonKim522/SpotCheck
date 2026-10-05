@@ -11,8 +11,23 @@ struct SeatEntry: TimelineEntry {
         return hold
     }
 
-    var isRecent: Bool {
-        snapshot?.isRecent(at: date) ?? false
+    var presentation: Presentation {
+        if !isSignedIn { return .signedOut }
+        if let hold { return .held(hold) }
+        guard let snapshot, !snapshot.levels.isEmpty else { return .empty }
+        return snapshot.isRecent(at: date) ? .levels(snapshot) : .notRecent(snapshot)
+    }
+
+    var background: Color {
+        if case .held = presentation { Color.holdGreen } else { Color(.systemBackground) }
+    }
+
+    enum Presentation {
+        case signedOut
+        case held(AvailabilitySnapshot.HeldSeat)
+        case levels(AvailabilitySnapshot)
+        case notRecent(AvailabilitySnapshot)
+        case empty
     }
 }
 
@@ -50,8 +65,10 @@ struct SpotCheckWidgetEntryView: View {
         switch family {
         case .systemSmall:
             SmallWidgetView(entry: entry)
+        case .systemMedium:
+            MediumWidgetView(entry: entry)
         default:
-            // TODO: medium and accessoryRectangular layouts
+            // TODO: accessoryRectangular layout
             Text(entry.snapshot?.buildingName ?? "No seat held. Open SpotCheck to find one.")
                 .containerBackground(.fill.tertiary, for: .widget)
         }
@@ -64,25 +81,24 @@ private struct SmallWidgetView: View {
     var body: some View {
         content
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-            .containerBackground(for: .widget) {
-                entry.hold == nil ? Color(.systemBackground) : Color.holdGreen
-            }
+            .containerBackground(for: .widget) { entry.background }
     }
 
     @ViewBuilder
     private var content: some View {
-        if !entry.isSignedIn {
-            message("Sign in to SpotCheck to see seats.")
-        } else if let hold = entry.hold {
+        switch entry.presentation {
+        case .signedOut:
+            WidgetMessage(text: "Sign in to SpotCheck to see seats.")
+        case .held(let hold):
             held(hold)
-        } else if let snapshot = entry.snapshot, let level = snapshot.emptiestLevel {
-            if entry.isRecent {
+        case .levels(let snapshot):
+            if let level = snapshot.emptiestLevel {
                 emptiest(level, in: snapshot)
-            } else {
-                notRecent(in: snapshot)
             }
-        } else {
-            message("No seat held. Open SpotCheck to find one.")
+        case .notRecent(let snapshot):
+            NotRecentNotice(buildingName: snapshot.buildingName)
+        case .empty:
+            WidgetMessage(text: "No seat held. Open SpotCheck to find one.")
         }
     }
 
@@ -114,26 +130,32 @@ private struct SmallWidgetView: View {
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
             Spacer(minLength: 0)
-            Circle()
-                .fill(level.fullness.fill)
-                .overlay { Circle().stroke(level.fullness.edge, lineWidth: 1.5) }
-                .frame(width: 22, height: 22)
+            FullnessDot(fullness: level.fullness, size: 22)
             Text("Level \(level.number)")
                 .font(.title3.weight(.semibold))
             Text("\(level.free) of \(level.total) free")
                 .font(.subheadline)
                 .monospacedDigit()
-            Text("Updated \(Text(snapshot.readAt, style: .relative)) ago")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
+            UpdatedLabel(readAt: snapshot.readAt)
         }
     }
+}
 
-    private func notRecent(in snapshot: AvailabilitySnapshot) -> some View {
+struct WidgetMessage: View {
+    let text: String
+
+    var body: some View {
+        Text(text)
+            .font(.subheadline.weight(.medium))
+    }
+}
+
+struct NotRecentNotice: View {
+    let buildingName: String
+
+    var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(snapshot.buildingName)
+            Text(buildingName)
                 .font(.caption)
                 .foregroundStyle(.secondary)
             Spacer(minLength: 0)
@@ -144,10 +166,29 @@ private struct SmallWidgetView: View {
                 .foregroundStyle(.secondary)
         }
     }
+}
 
-    private func message(_ text: String) -> some View {
-        Text(text)
-            .font(.subheadline.weight(.medium))
+struct UpdatedLabel: View {
+    let readAt: Date
+
+    var body: some View {
+        Text("Updated \(Text(readAt, style: .relative)) ago")
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
+    }
+}
+
+struct FullnessDot: View {
+    let fullness: LevelFullness
+    let size: CGFloat
+
+    var body: some View {
+        Circle()
+            .fill(fullness.fill)
+            .overlay { Circle().stroke(fullness.edge, lineWidth: 1.5) }
+            .frame(width: size, height: size)
     }
 }
 
