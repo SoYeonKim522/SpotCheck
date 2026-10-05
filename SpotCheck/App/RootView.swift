@@ -4,6 +4,7 @@ struct RootView: View {
     private enum AppTab {
         case findASeat
         case myCheckIn
+        case history
     }
 
     @Environment(\.scenePhase) private var scenePhase
@@ -11,6 +12,7 @@ struct RootView: View {
     @State private var session: AuthSession
     @State private var levelList: LevelListViewModel
     @State private var myCheckIn: MyCheckInViewModel
+    @State private var history: StudyHistoryViewModel
     @State private var selectedTab = AppTab.findASeat
     @State private var hasRestored = false
 
@@ -61,6 +63,9 @@ struct RootView: View {
                 session: session
             )
         )
+        _history = State(
+            initialValue: StudyHistoryViewModel(repository: repository, session: session)
+        )
     }
 
     var body: some View {
@@ -76,6 +81,7 @@ struct RootView: View {
         .environment(session)
         .environment(levelList)
         .environment(myCheckIn)
+        .environment(history)
         .task {
             await session.restore()
             hasRestored = true
@@ -83,6 +89,7 @@ struct RootView: View {
         .onChange(of: session.isSignedIn) {
             if !session.isSignedIn {
                 myCheckIn.reset()
+                history.reset()
                 selectedTab = .findASeat
             }
         }
@@ -106,6 +113,9 @@ struct RootView: View {
             }
             Tab("My check-in", systemImage: "clock", value: AppTab.myCheckIn) {
                 MyCheckInView()
+            }
+            Tab("History", systemImage: "clock.arrow.circlepath", value: AppTab.history) {
+                StudyHistoryView()
             }
         }
         .tabViewBottomAccessory(isEnabled: myCheckIn.hold != nil && selectedTab != .myCheckIn) {
