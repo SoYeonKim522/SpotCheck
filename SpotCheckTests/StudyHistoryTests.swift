@@ -41,6 +41,19 @@ struct StudyHistoryTests {
         #expect(total == SeatHoldPolicy.duration)
     }
 
+    @Test func studyTimeThisWeekAddsUpTheMinutesShownForEachCheckIn() throws {
+        let calendar = calendar(firstWeekday: 2)
+        let wednesday = try date(year: 2026, month: 10, day: 7, calendar: calendar)
+        let first = TestData.hold(of: TestData.checkIn(at: wednesday, releasedAt: wednesday.addingTimeInterval(14 * 60 + 40)))
+        let second = TestData.hold(of: TestData.checkIn(at: wednesday.addingTimeInterval(3600), releasedAt: wednesday.addingTimeInterval(3600 + 5 * 60 + 40)))
+
+        let total = StudyHistoryViewModel.studyTime(of: [first, second], inWeekOf: wednesday, calendar: calendar)
+
+        #expect(first.checkIn.minutesAtSeat == 15)
+        #expect(second.checkIn.minutesAtSeat == 6)
+        #expect(total == 21 * 60)
+    }
+
     @Test func theWeekStartsOnTheCalendarsFirstWeekday() throws {
         let sunday = try date(year: 2026, month: 10, day: 4, hour: 10, calendar: calendar(firstWeekday: 1))
         let tuesday = try date(year: 2026, month: 10, day: 6, calendar: calendar(firstWeekday: 1))

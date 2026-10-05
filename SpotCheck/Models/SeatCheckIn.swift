@@ -26,4 +26,10 @@ struct SeatCheckIn: Identifiable, Hashable {
     var timeAtSeat: TimeInterval {
         (releasedAt ?? expiresAt).timeIntervalSince(checkedInAt)
     }
+
+    /// The time at the seat in whole minutes, rounded to the nearest minute.
+    /// Screens show this value, so a total made from it matches the rows it adds up.
+    var minutesAtSeat: Int {
+        Int((timeAtSeat / 60).rounded())
+    }
 }

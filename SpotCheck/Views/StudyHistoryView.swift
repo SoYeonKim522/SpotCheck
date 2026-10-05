@@ -72,7 +72,7 @@ private struct HistoryRow: View {
                     .foregroundStyle(.secondary)
             }
             Spacer()
-            Text(timeText(hold.checkIn.timeAtSeat))
+            Text(timeText(TimeInterval(hold.checkIn.minutesAtSeat * 60)))
                 .monospacedDigit()
         }
         .padding(.vertical, 2)

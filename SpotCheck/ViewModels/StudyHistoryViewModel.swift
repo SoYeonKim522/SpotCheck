@@ -44,13 +44,13 @@ final class StudyHistoryViewModel {
         state = .loading
     }
 
-    /// The time at the seat for check-ins made in the week that contains `now`.
+    /// The time at the seat for check-ins made in the week that contains `now`, in whole minutes per check-in.
     /// The calendar decides which weekday the week starts on.
     static func studyTime(of holds: [SeatHold], inWeekOf now: Date, calendar: Calendar) -> TimeInterval {
         guard let week = calendar.dateInterval(of: .weekOfYear, for: now) else { return 0 }
         return holds
             .map(\.checkIn)
             .filter { week.contains($0.checkedInAt) }
-            .reduce(0) { $0 + $1.timeAtSeat }
+            .reduce(0) { $0 + TimeInterval($1.minutesAtSeat * 60) }
     }
 }
