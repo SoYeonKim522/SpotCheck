@@ -22,10 +22,11 @@ struct SignInView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Circle()
-                .fill(Color.holdGreen)
-                .overlay { Circle().stroke(.primary, lineWidth: 2) }
-                .frame(width: 64, height: 64)
+            Image("AppLogo")
+                .resizable()
+                .frame(width: 72, height: 72)
+                .clipShape(.rect(cornerRadius: 16, style: .continuous))
+                .accessibilityHidden(true)
                 .padding(.top, 24)
 
             Text("Sign in")
