@@ -30,7 +30,7 @@ struct UserNotificationReminderScheduler: ExpiryReminderScheduling {
         guard delay > 0 else { return }
 
         let content = UNMutableNotificationContent()
-        content.title = "Your seat is almost up"
+        content.title = "Your seat reservation ends soon"
         content.body = "Seat \(hold.seatLabel) on Level \(hold.levelNumber) is held until \(hold.checkIn.expiresAt.formatted(date: .omitted, time: .shortened))."
         content.sound = .default
         content.categoryIdentifier = ReminderNotification.categoryIdentifier
