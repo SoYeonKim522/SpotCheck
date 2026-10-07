@@ -4,6 +4,8 @@ SpotCheck is an iOS app that shows which study seats are free in UTS buildings, 
 
 Built for UTS 40005 Advanced iOS Development, Assessment 3.
 
+Repository: https://github.com/SoYeonKim522/SpotCheck
+
 ## Domain context
 
 A student with a one-hour gap between classes has no way to see where a free self-study seat is. Students may need to walk between several levels to find an available seat, which can use up much of their limited break.
@@ -70,10 +72,11 @@ You need Xcode 26. The project targets iOS 26.2.
 
 The app is preconfigured to connect to a hosted Supabase project containing the required database schema and seeded data. No Supabase setup is required to run the project.
 
-1. Open `SpotCheck.xcodeproj`. Xcode downloads the Supabase Swift package dependencies.
-2. In Signing & Capabilities, select your Apple Developer team for the main app and both extensions. If you change the bundle identifiers, update the App Group identifier in `AppGroup.swift` and in all three `.entitlements` files.
-3. Run the `SpotCheck` scheme on an iPhone simulator.
-4. Sign in with the test account. The app does not have a sign-up screen.
+1. Clone the repository with `git clone https://github.com/SoYeonKim522/SpotCheck.git`.
+2. Open `SpotCheck.xcodeproj`. Xcode downloads the Supabase Swift package dependencies.
+3. In Signing & Capabilities, select your Apple Developer team for the main app and both extensions. If you change the bundle identifiers, update the App Group identifier in `AppGroup.swift` and in all three `.entitlements` files.
+4. Run the `SpotCheck` scheme on an iPhone simulator.
+5. Sign in with the test account. The app does not have a sign-up screen.
    - Email: `spotcheck@gmail.com`
    - Password: `spotcheck`
 
